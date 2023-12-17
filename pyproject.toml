@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "IPO Calender tool"
+version = "0.1.0"
+description = "A sample project to analyze IPOs and the follow up data"
+authors = ["Laura Gerlach <l.gerlach@icloud.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+sqlalchemy = "^2.0.21"
+python-dotenv = "1.0.0"
+psycopg2-binary = "2.9.9"
+cachetools = "^5.3.1"
+pydantic = "^2.4.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe]
+envfile = ".env"

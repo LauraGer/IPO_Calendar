@@ -1,0 +1,43 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_airflow
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    ports:
+      - "5432:5432"
+    networks:
+      - airflow-network
+
+  airflow:
+    image: apache/airflow:latest
+    restart: always
+    container_name: airflow
+    entrypoint: ["bash", "-c"]
+    command:
+      - "/opt/airflow/airflow_setup.sh"
+    environment:
+      - FLASK_APP=airflow.www.app:cached_app()
+      - DB_HOST=0.0.0.0
+      - POSTGRES_USER=airflow
+      - POSTGRES_DB=airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/airflow
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./requirements.txt:/opt/airflow/requirements.txt
+      - ./airflow_setup.sh:/opt/airflow/airflow_setup.sh
+    depends_on:
+      - postgres
+    networks:
+      - airflow-network
+
+networks:
+  airflow-network:
+
+
