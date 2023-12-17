@@ -4,9 +4,10 @@ services:
     image: postgres:13
     container_name: postgres_airflow
     environment:
-      POSTGRES_DB: airflow
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:
@@ -20,17 +21,19 @@ services:
     command:
       - "/opt/airflow/airflow_setup.sh"
     environment:
-      - FLASK_APP=airflow.www.app:cached_app()
-      - DB_HOST=0.0.0.0
-      - POSTGRES_USER=airflow
-      - POSTGRES_DB=airflow
+      - FLASK_APP=${FLASK_APP}
+      - DB_HOST=${HOST}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - AIRFLOW_DB=${AIRFLOW_DB}
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
+      - APP_DB=${APP_DB}
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=${AIRFLOW__CORE__SQL_ALCHEMY_CONN}
     ports:
       - "8080:8080"
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./requirements.txt:/opt/airflow/requirements.txt
       - ./airflow_setup.sh:/opt/airflow/airflow_setup.sh
     depends_on:
       - postgres

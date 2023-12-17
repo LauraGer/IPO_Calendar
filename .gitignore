@@ -3,3 +3,9 @@
 
 # Ignore poetry lock file
 poetry.lock
+
+
+# Ignore poetry lock file
+__pycache__
+
+dags/__pycache__
