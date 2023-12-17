@@ -1,6 +1,6 @@
-from config import FINNHUB_API_KEY
 import finnhub
 import pandas as pd
+from config import FINNHUB_API_KEY
 from datetime import date, timedelta
 
 finnhub_api_key = FINNHUB_API_KEY

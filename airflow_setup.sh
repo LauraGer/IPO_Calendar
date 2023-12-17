@@ -16,7 +16,7 @@ echo "DB INIT START"
 # Check if the database exists
 if python -c "from airflow import models; models.Connection"; then
     echo "Airflow database already exists. Performing migrations..."
-    airflow db upgrade
+    airflow db migrate
 else
     echo "Airflow database does not exist. Initializing..."
     airflow db init
@@ -40,7 +40,7 @@ echo "WEBSCHEDULER START"
 
 airflow scheduler &
 
-wait 
+wait
 
 # start worker
 echo "--------------------------------"

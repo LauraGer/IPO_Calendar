@@ -7,9 +7,6 @@ from dba.db_model import StockSymbols
 from dba_helper import engine, db_params, migrate_data
 from get_sources import get_stock_symbols
 from sqlalchemy import create_engine, MetaData, Table, exc
-from datetime import datetime
-import pandas as pd
-import psycopg2
 
 metadata = MetaData(bind=engine)
 
@@ -30,20 +27,19 @@ def write_df_to_postgres():
             try:
 
                 print('##WRTIE DF TO_SQL##')
-                # Write DataFrame to the database table within the transaction
                 df.to_sql('StockSymbols', conn, if_exists='replace', index=False)
 
                 print('##COMMIT TRANSACTION##')
-                trans.commit()  # Commit the transaction
+                trans.commit()
             except exc.SQLAlchemyError as e:
                 print(f"Error occurred: {e}")
-                trans.rollback()  # Rollback changes if an exception occurs
+                trans.rollback()
                 raise
 
 dag = DAG(
     'load_stockSymbol_data_to_postgres',
-    start_date=datetime(2023, 1, 1),  # Adjust the start date
-    schedule_interval=None,  # Set the scheduling interval (e.g., '@once' or a cron schedule)
+    start_date=datetime(2023, 1, 1),
+    schedule_interval=None,
 )
 
 create_table_task = PythonOperator(

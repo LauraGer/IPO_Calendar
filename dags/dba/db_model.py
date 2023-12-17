@@ -9,15 +9,15 @@ class IPO_Calendar(Base):
     __tablename__ = 'IPO_Calendar'
     __table_args__ = {'schema': 'public'}  # Specify the schema
 
-    ipo_calencar_id = Column(Integer, primary_key=True, autoincrement=True)
+    ipo_calendar_id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date)
     exchange = Column(String(64))
     name = Column(String(255))
-    agnumberOfShares = Column(Integer)
-    price = Column(Float)
+    numberOfShares = Column(Integer)
+    price = Column(String(32))
     status = Column(String(32))
     symbol = Column(String(32))
-    totalShareValue = Column(Integer)
+    totalSharesValue = Column(Integer)
 
 class IPO_CalendarArchive(Base):
     __tablename__ = 'IPO_CalendarArchive'

@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 import discord
 from discord.ext import commands
+from config import DISCORD_TOKEN
+
 
 # Discord Bot setup
 bot = commands.Bot(command_prefix="!")  # You can adjust the prefix as needed
@@ -23,5 +25,5 @@ async def handle_discord_command(request: CommandRequest):
 # Run FastAPI app and Discord bot
 if __name__ == "__main__":
     import uvicorn
-    bot.run('YOUR_DISCORD_BOT_TOKEN')  # Replace with your Discord bot token
+    bot.run(DISCORD_TOKEN)  # Replace with your Discord bot token
     uvicorn.run(app, host="0.0.0.0", port=8000)
