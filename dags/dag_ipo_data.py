@@ -37,6 +37,7 @@ def create_table_if_not_exist():
     if not metadata.tables.get('IPO_Calendar'):
         IPO_Calendar.__table__.create(engine, checkfirst=True)
 
+
 def write_df_to_postgres():
     ###################################################
     # gets per quater IPO Calendar data from finnhub.io.
@@ -109,6 +110,11 @@ remove_duplicates_task = PythonOperator(
 # TASK FLOW
 create_table_task >>  write_task >> remove_duplicates_task
 
+remove_duplicates_task = PythonOperator(
+    task_id='remove_duplicates_task',
+    python_callable=remove_duplicates,
+    dag=dag_load_ipo_data
+)
 
 
 # def copy_data_into_archive():

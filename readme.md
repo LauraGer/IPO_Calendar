@@ -122,4 +122,3 @@ http://localhost:8000/StockGraphSymbolFilter?symbol=xyz
 
 another font (https://unblast.com/download/48373/)
 
-Diagram (https://excalidraw.com/#json=Im-3hUokNjZaANgzMbo2Q,OrkPI-u5UUv34eRUVeexjA)

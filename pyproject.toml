@@ -8,6 +8,7 @@ authors = ["Laura Gerlach <l.gerlach@icloud.com>"]
 apache-airflow = "^2.8.1"
 cachetools = "^5.3.1"
 discord = "*"
+email-validator= "*"
 fastapi = "*"
 flask-appbuilder = "*"
 finnhub-python = "2.4.18"
@@ -29,7 +30,6 @@ pytest-mock = "^3.12.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.27.1"
-email-validator= "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
