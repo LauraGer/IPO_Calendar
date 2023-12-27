@@ -30,11 +30,14 @@ services:
       - APP_DB=${APP_DB}
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=${AIRFLOW__CORE__SQL_ALCHEMY_CONN}
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - PYTHONPATH=/opt/airflow
     ports:
       - "8080:8080"
     volumes:
       - ./dags:/opt/airflow/dags
       - ./airflow_setup.sh:/opt/airflow/airflow_setup.sh
+      - ./app:/opt/airflow/app
     depends_on:
       - postgres
     networks:

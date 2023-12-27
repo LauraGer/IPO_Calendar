@@ -1,5 +1,6 @@
 import os
 
+
 #load environment variables
 HOST = os.getenv("DB_HOST")
 DATABASE = os.getenv("APP_DB")

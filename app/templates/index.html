@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar with Hover Details</title>
+    <style>
+        /* Your CSS styles for the calendar grid */
+        /* Style each cell, adjust size, borders, etc. */
+        .calendar-cell {
+            width: 100px;
+            height: 80px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <img src="{{ url_for('static', path='calendar_with_entries.png') }}" alt="Calendar" usemap="#calendar-map">
+        <map name="calendar-map">
+            <!-- Define areas (regions) within the image -->
+            <area shape="rect" coords="x1,y1,x2,y2" href="#" alt="Cell 1" title="Cell 1">
+            <!-- Add more <area> elements for other regions -->
+        </map>
+    </div>
+
+    <!-- Your JavaScript for handling interactivity -->
+    <script src="{{ url_for('static', path='scripts.js') }}"></script>
+</body>
+</html>

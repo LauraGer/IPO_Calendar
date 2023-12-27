@@ -1,0 +1,27 @@
+/* Your CSS styles for the calendar grid */
+/* Style each cell, adjust size, borders, etc. */
+.calendar-cell {
+  width: 100px;
+  height: 80px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Style for the entry details popup */
+#entry-details {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: none;
+  z-index: 9999;
+  max-width: 200px;
+  /* Adjust styles as needed for appearance */
+}
+  @font-face {
+    font-family: 'Urbanist-Bold';
+    src: url('../fonts/Urbanist-Bold.ttf') format('truetype');
+}

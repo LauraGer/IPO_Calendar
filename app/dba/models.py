@@ -1,5 +1,4 @@
-from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Date, Float, DateTime
+from sqlalchemy import Column, Integer, String, Date, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -9,34 +8,34 @@ class IPO_Calendar(Base):
     __tablename__ = 'IPO_Calendar'
     __table_args__ = {'schema': 'public'}  # Specify the schema
 
-    ipo_calencar_id = Column(Integer, primary_key=True, autoincrement=True)
+    ipo_calendar_id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date)
     exchange = Column(String(64))
     name = Column(String(255))
-    agnumberOfShares = Column(Integer)
-    price = Column(Float)
+    numberOfShares = Column(Float)
+    price = Column(String(32))
     status = Column(String(32))
     symbol = Column(String(32))
-    totalShareValue = Column(Integer)
+    totalSharesValue = Column(Float)
 
 class IPO_CalendarArchive(Base):
     __tablename__ = 'IPO_CalendarArchive'
     __table_args__ = {'schema': 'public'}  # Specify the schema
 
-    ipo_calencar_id = Column(Integer, primary_key=True, autoincrement=True)
+    ipo_calendar_id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date)
     exchange = Column(String(64))
     name = Column(String(255))
-    agnumberOfShares = Column(Integer)
-    price = Column(Float)
+    numberOfShares = Column(Float)
+    price = Column(String(32))
     status = Column(String(32))
     symbol = Column(String(32))
-    totalShareValue = Column(Integer)
-    timestamp_column = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    totalShareValue = Column(Float)
+    timestamp_column = Column(DateTime)
 
 
 class StockSymbols(Base):
-    __tablename__ = 'StockSymblos'
+    __tablename__ = 'StockSymbols'
     __table_args__ = {'schema': 'public'}  # Specify the schema
 
     symbol_id = Column(Integer, primary_key=True, autoincrement=True)
