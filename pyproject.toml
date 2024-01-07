@@ -5,23 +5,25 @@ description = "A sample project to analyze IPOs and the follow up data"
 authors = ["Laura Gerlach <l.gerlach@icloud.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-sqlalchemy = "^2.0.21"
-python-dotenv = "1.0.0"
-psycopg2-binary = "2.9.9"
+apache-airflow= ">=2.8.0,<3.0.0"
 cachetools = "^5.3.1"
-pydantic = "^2.4.2"
 discord = "*"
 fastapi = "*"
-uvicorn = "*"
 finnhub-python = "2.4.18"
-pandas = "*"
 jinja2 = "^3.1.2"
+pandas = "*"
 pillow = "^10.1.0"
+plotly = "^5.18.0"
+python = "<3.12,~=3.8"
+python-dotenv = "^1.0.0"
+psycopg2-binary = "2.9.9"
+pydantic = "^2.4.2"
+pytest= "7.4.4"
+sqlalchemy = "<2.0"
+uvicorn = "*"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.27.1"
-python-dotenv = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

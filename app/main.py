@@ -1,23 +1,64 @@
+"""
+Copyright 2023 Laura Gerlach
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+from app.dba.db_helper import get_entries_from_db, get_history_by_symbol, get_symbol_details, get_entries
+from app.generator_calendar import add_entries_to_calendar
+from app.generator_graph import build_graph
+from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from generator import add_entries_to_calendar, get_entries_from_db
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     add_entries_to_calendar(2023, 12)
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/calendar", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("calendar.html", {"request": request})
+
+# Route to fetch data from PostgreSQL
+@app.get("/calendar/data")
+async def get_data():
+    try:
+        result = get_entries(2020,12)
+        data = []
+        for row in result:
+            date_obj = row.date
+            date_str = date_obj.strftime("%Y-%m-%d")
+            row_dict = {
+                "date": date_str,
+                "symbol": row.symbol,
+                }
+            data.append(row_dict)
+    except Exception as e:
+        print(f"Error occurred: {e}")  # Log the error message for debugging
+        raise  # Raise the exception to get a detailed traceback
+
+    return data
+
 @app.get("/IPOs",response_class=HTMLResponse)
 async def get_dataset(request: Request):
     entries = get_entries_from_db(2023,12)
-
     title = "IPO's"
     table_name = "requested IPO's"
 
@@ -30,13 +71,29 @@ async def get_dataset(request: Request):
 @app.get("/IPOsFilter", response_class=HTMLResponse)
 async def get_dataset(request: Request, year: int, month: int):
 
-    entries = get_entries_from_db(year, month)  # Adjust this according to your actual database query logic
+    entries = get_entries_from_db(year, month)
+
+    count =  f"total of {len(entries)}"
 
     title = "IPO's"
     table_name = f"requested IPO's for Year: {year} and Month: {month}"
+    columns = ["Date", "Desciption", "Symbol"]
 
-    return templates.TemplateResponse("tables.html",
-                                      {"request": request,
-                                       "title": title,
-                                       "table_name": table_name,
-                                       "entries": entries})
+    return templates.TemplateResponse("tables.html", {"request": request,
+                                                      "title": title,
+                                                      "count": count,
+                                                      "table_name": table_name,
+                                                      "entries": entries,
+                                                      "columns": columns})
+
+@app.get("/StockGraphSymbolFilter", response_class=HTMLResponse)
+async def get_dataset(request: Request, symbol: str):
+    #entries = get_history_by_symbol(symbol)
+    graph_html = build_graph(symbol)
+
+    details = get_symbol_details(symbol)
+    symbol_details = f"Graph of {symbol} - {details[0]}"
+
+    return templates.TemplateResponse("stock_graph.html", {"request": request,
+                                                           "symbol_graph_title" : symbol_details,
+                                                           "graph_html": graph_html})

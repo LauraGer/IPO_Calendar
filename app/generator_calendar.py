@@ -1,45 +1,27 @@
-from PIL import Image, ImageDraw, ImageFont
-import os
+"""
+Copyright 2023 Laura Gerlach
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 import calendar
-from config import font_path, static_path, DATABASE, USER, PASSWORD, HOST
-from sqlalchemy import create_engine, Table, MetaData, select, and_, extract
-from sqlalchemy.orm import sessionmaker
-from dba.models import Base, IPO_Calendar
-from db_helper import engine, build_date_range
-
-# # Create a sessionmaker bound to the engine
-Session = sessionmaker(bind=engine)
-# Create a session
-session = Session()
-
-
-def get_entries(year, month):
-    date_from, date_to = build_date_range(year, month)
-
-    results = session.query(
-                        IPO_Calendar.date,
-                        IPO_Calendar.symbol
-                        ).filter(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to
-    ).all()
-
-    entries = {
-        (date.year, date.month, date.day): event_name
-        for date, event_name in results
-    }
-    return(entries)
-
-
-def get_entries_from_db(year, month ):
-    print(year, month )
-    date_from, date_to = build_date_range(year, month)
-    print(date_from, date_to)
-    results = session.query(IPO_Calendar.date,IPO_Calendar.name, IPO_Calendar.symbol).filter(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to
-    ).all()
-    return(results)
+import numpy as np
+import os
+import pandas as pd
+import plotly.graph_objs as go
+import plotly.offline as pyo
+from app.config import font_path, static_path
+from app.dba.db_helper import get_entries
+from PIL import Image, ImageDraw, ImageFont
 
 # Function to add entries to the calendar image
 def add_entries_to_calendar(year, month):
@@ -71,7 +53,11 @@ def add_entries_to_calendar(year, month):
                 draw.text((x0 + 2, y0 + 2), str(day), fill="black", font=font_24)
                 # Check if date has an entry
 
-                entries = get_entries(year,month)
+                results = get_entries(year,month)
+                entries = {
+                    (date.year, date.month, date.day): event_name
+                    for date, event_name in results
+                }
                 if date in entries:
                     entry_text = entries[date]
                     entry_text_with_line_breaks = "\n".join(entry_text[i:i+15] for i in range(0, len(entry_text), 15))  # Insert line break every 15 characters

@@ -1,0 +1,17 @@
+<!-- stock_graph.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+    <!-- Include Plotly.js library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>{{ symbol_graph_title }}</h1>
+    <div id="plotlyGraph">
+        <!-- Render the Plotly graph -->
+        {{ graph_html | safe }}
+    </div>
+</body>
+</html>

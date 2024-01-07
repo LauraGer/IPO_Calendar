@@ -1,5 +1,41 @@
-/* Your CSS styles for the calendar grid */
-/* Style each cell, adjust size, borders, etc. */
+
+/* Styles for the calendar container */
+.calendar-container {
+  position: relative;
+  width: 800px; /* Adjust width and height as needed */
+  height: 600px;
+  margin: 0 auto;
+  /* Add more styles as needed */
+}
+
+/* Styles for the calendar image */
+.calendar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensure the image covers the container */
+}
+
+/* Styles for the entry details (initially hidden) */
+.entry-details {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  display: none;
+  /* Add more styles as needed */
+}
+
+/* Additional styles to show/hide the details */
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
 .calendar-cell {
   width: 100px;
   height: 80px;
@@ -21,7 +57,46 @@
   max-width: 200px;
   /* Adjust styles as needed for appearance */
 }
-  @font-face {
-    font-family: 'Urbanist-Bold';
-    src: url('../fonts/Urbanist-Bold.ttf') format('truetype');
+/* styles.css */
+
+/* Define font faces using @font-face */
+@font-face {
+  font-family: 'UrbanistBlack'; /* Specify a name for your custom font */
+  src: url('fonts/Urbanist-Black.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+@font-face {
+  font-family: 'UrbanistBold'; /* Specify a name for another custom font */
+  src: url('fonts/Urbanist-Bold.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+@font-face {
+  font-family: 'UrbanistLight'; /* Specify a name for another custom font */
+  src: url('fonts/Urbanist-Light.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+@font-face {
+  font-family: 'UrbanistThin'; /* Specify a name for another custom font */
+  src: url('fonts/Urbanist-Thin.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+/* Apply the custom font to specific elements */
+body {
+  font-family: 'UrbanistLight', Arial, sans-serif;
+}
+
+title {
+  font-family: 'UrbanistBold', Arial, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'UrbanistBlack', Arial, sans-serif;
+}
+
+.bold-heading {
+  font-family: 'UrbanistBold', Arial, sans-serif;
 }
