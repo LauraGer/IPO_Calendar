@@ -21,7 +21,49 @@
   max-width: 200px;
   /* Adjust styles as needed for appearance */
 }
-  @font-face {
-    font-family: 'Urbanist-Bold';
-    src: url('../fonts/Urbanist-Bold.ttf') format('truetype');
+/* styles.css */
+
+/* Define font faces using @font-face */
+@font-face {
+  font-family: 'UrbanistBlack'; /* Specify a name for your custom font */
+  src: url('fonts/Urbanist-Black.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
 }
+
+@font-face {
+  font-family: 'UrbanistBold'; /* Specify a name for another custom font */
+  src: url('fonts/Urbanist-Bold.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+@font-face {
+  font-family: 'UrbanistLight'; /* Specify a name for another custom font */
+  src: url('fonts/Urbanist-Light.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+@font-face {
+  font-family: 'UrbanistThin'; /* Specify a name for another custom font */
+  src: url('fonts/Urbanist-Thin.ttf') format('truetype'); /* Path to your font file */
+  /* Add more font formats (e.g., woff, woff2) for cross-browser compatibility */
+}
+
+/* Apply the custom font to specific elements */
+body {
+  font-family: 'UrbanistLight', Arial, sans-serif;
+}
+
+title {
+  font-family: 'UrbanistBold', Arial, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'UrbanistBlack', Arial, sans-serif;
+}
+
+.bold-heading {
+  font-family: 'UrbanistBold', Arial, sans-serif;
+}
+
+/* Define styles for other elements */
+/* Adjust font styles for different elements as needed */

@@ -1,45 +1,12 @@
-from PIL import Image, ImageDraw, ImageFont
-import os
 import calendar
-from config import font_path, static_path, DATABASE, USER, PASSWORD, HOST
-from sqlalchemy import create_engine, Table, MetaData, select, and_, extract
-from sqlalchemy.orm import sessionmaker
-from dba.models import Base, IPO_Calendar
-from db_helper import engine, build_date_range
-
-# # Create a sessionmaker bound to the engine
-Session = sessionmaker(bind=engine)
-# Create a session
-session = Session()
-
-
-def get_entries(year, month):
-    date_from, date_to = build_date_range(year, month)
-
-    results = session.query(
-                        IPO_Calendar.date,
-                        IPO_Calendar.symbol
-                        ).filter(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to
-    ).all()
-
-    entries = {
-        (date.year, date.month, date.day): event_name
-        for date, event_name in results
-    }
-    return(entries)
-
-
-def get_entries_from_db(year, month ):
-    print(year, month )
-    date_from, date_to = build_date_range(year, month)
-    print(date_from, date_to)
-    results = session.query(IPO_Calendar.date,IPO_Calendar.name, IPO_Calendar.symbol).filter(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to
-    ).all()
-    return(results)
+import numpy as np
+import os
+import pandas as pd
+import plotly.graph_objs as go
+import plotly.offline as pyo
+from app.config import font_path, static_path
+from app.dba.db_helper import get_entries
+from PIL import Image, ImageDraw, ImageFont
 
 # Function to add entries to the calendar image
 def add_entries_to_calendar(year, month):

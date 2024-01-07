@@ -1,11 +1,11 @@
 import psycopg2
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from datetime import date, timedelta, datetime
-from app.dba.models import IPO_Calendar, IPO_CalendarArchive
+from app.dba.models import IPO_Calendar
 from dags.db_helper import engine, db_params, check_if_records_exist, metadata
+from datetime import date, timedelta, datetime
 from get_sources import get_ipo_data
-from sqlalchemy import Table, exc, cast, Date, Float, func, select
+from sqlalchemy import Table, exc, func, select
 
 today = date.today()
 
@@ -132,7 +132,8 @@ def truncate_table_ipo_calendar():
 dag_load_ipo_data = DAG(
     'load_ipo_data_to_postgres',
     start_date=datetime(2023, 1, 1),
-    schedule_interval=None,
+    schedule_interval='0 7 * * 1',  # Schedule for Monday at 8 AM
+    catchup=False
 )
 
 # TASKS

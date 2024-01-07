@@ -46,3 +46,16 @@ class StockSymbols(Base):
     mic = Column(String(32))
     symbol = Column(String(32))
     type = Column(String(32))
+
+class MonthlyHistoryByStockSymbol(Base):
+    __tablename__ = 'MonthlyHistoryByStockSymbol'
+    __table_args__ = {'schema': 'public'}  # Specify the schema
+
+    monthly_history_id = Column(Integer, primary_key=True, autoincrement=True)
+    symbol = Column(String(32))
+    date = Column(Date)
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(Integer)

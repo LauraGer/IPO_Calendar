@@ -1,9 +1,7 @@
-
-
+from app.dba.models import StockSymbols
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
-from app.dba.models import StockSymbols
 from db_helper import engine, metadata
 from get_sources import get_stock_symbols
 from sqlalchemy import MetaData, exc
