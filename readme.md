@@ -10,7 +10,8 @@
   - [ ] decouple logic of building query and the execution
 - [ ] adding unit tests
 - [x] load Stock Symbols into postgres
-  - [ ] load worldwide stock details - currently only US is available
+  - [x] currently only US is available from finnhub
+  - [ ] load worldwide stock details via FMP API
 - [x] get historical data per Symbol
   - [x] add scheduler to load every day at 8am historical data for IPOs (only in 25 batches per day, free limit of Aplha Vantage)
 
@@ -33,8 +34,14 @@
 # to run this code locally simply follow these steps 🙂
 
 ## create free keys of finance APIs:
-- finnhub key for IPOs and Stock Symbols -> [here](https://finnhub.io/)
+[This article on medium.com]( https://medium.com/coinmonks/best-stock-market-apis-ae1efb739ac4) gave me good overview about finance APIs.
+I'm using the below ones to gather bits and pieces together.
+- finnhub key for IPOs and Stock Symbols (only US is available for free) -> [here](https://finnhub.io/)
 - alpha vantage key for historical data per Symbol -> [here](https://www.alphavantage.co/support/#api-key)
+- FMP (financial modeling prep) API for wordlwird stock details -> [here](http://site.financialmodelingprep.com/developer/docs/stock-market-quote-free-api/?direct=true)
+
+## get exchange csv and save local in `./dags/local_data/`
+- download as csv from finnhub -> [here](https://docs.google.com/spreadsheets/d/1I3pBxjfXB056-g_JYf_6o3Rns3BV2kMGG1nCatb91ls)
 
 ## create in root directory a `.env` file and replace `###`
 ```.env

@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 # This file keeps methods to create sql query statements
-
 from sqlalchemy import select, func
 
 aggregation_functions = {
@@ -26,13 +25,19 @@ aggregation_functions = {
 }
 
 def get_scalar_aggregation_from_table(table, aggregation_name, *columns):
+    # this function creates a aggregated sql query
+    # input: table name, aggregation name and a list of columns
+    # output: aggregated sql query
     aggregation_func = aggregation_functions.get(aggregation_name)
-    # print(f"table:'{table}'")
     if aggregation_func is None:
         raise ValueError(f"Aggregation function '{aggregation_name}' is not supported.")
     select_columns = [aggregation_func(column) for column in columns]
-    # print(f"select_columns:'{select_columns}'")
-    # print(f"select_from(table): '{select(select_columns, from_obj=table, correlate=False)}'")
     aggregation_query = select(select_columns, from_obj=table, correlate=False)
 
     return aggregation_query
+
+def get_list_of_column_values_from_table(table, column):
+    select_columns =  table.c[column]
+    list_query = select(select_columns)
+
+    return list_query

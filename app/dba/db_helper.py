@@ -42,6 +42,7 @@ def get_session():
     session = Session()
     return session
 
+session = get_session()
 
 # Define connection parameters
 class PostgresIPOcalendarConfig:
@@ -54,7 +55,7 @@ class PostgresIPOcalendarConfig:
     schema = "public"
 
 
-def build_date_range(year, month):
+def build_date_range_year_month(year, month):
 
     start_date = datetime(year, month, 1).date()
     next_month = start_date.replace(day=28) + timedelta(days=4)
@@ -63,10 +64,9 @@ def build_date_range(year, month):
     return start_date, end_date
 
 
-def get_entries_from_db(year, month):
+def get_entries_from_db(year, month, session = session):
 
-    date_from, date_to = build_date_range(year, month)
-    session = get_session()
+    date_from, date_to = build_date_range_year_month(year, month)
     results = session.query(IPO_Calendar.date,IPO_Calendar.name, IPO_Calendar.symbol).filter(
         IPO_Calendar.date >= date_from,
         IPO_Calendar.date <= date_to
@@ -75,8 +75,7 @@ def get_entries_from_db(year, month):
 
     return(results)
 
-def get_history_by_symbol(symbol):
-    session = get_session()
+def get_history_by_symbol(symbol, session = session):
 
     results = session.query(MonthlyHistoryByStockSymbol.date,
                             MonthlyHistoryByStockSymbol.open,
@@ -89,47 +88,45 @@ def get_history_by_symbol(symbol):
 
     return(results)
 
-def get_symbols(year, month):
-    date_from, date_to = build_date_range(year, month)
+def get_symbols(year, month, session = session):
+    date_from, date_to = build_date_range_year_month(year, month)
 
-    session = get_session()
     results = session.query(IPO_Calendar.symbol).filter(
         IPO_Calendar.date >= date_from,
         IPO_Calendar.date <= date_to,
-        IPO_Calendar.symbol != None
+        IPO_Calendar.symbol != None,
+        IPO_Calendar.symbol != ""
     ).all()
 
     raw_strings = [item[0] for item in results]
 
     return(raw_strings)
 
-def get_entries(year, month):
-    date_from, date_to = build_date_range(year, month)
-
-    session = get_session()
-    results = session.query(
-                        IPO_Calendar.date,
-                        IPO_Calendar.symbol
-                        ).filter(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to,
-        IPO_Calendar.symbol != None
-    ).all()
+def get_entries(year, month, session = session):
+    date_from, date_to = build_date_range_year_month(year, month)
+    results = (
+        session.query(IPO_Calendar.date,
+                      IPO_Calendar.symbol
+                )
+        .filter(
+            IPO_Calendar.date >= date_from,
+            IPO_Calendar.date <= date_to,
+            IPO_Calendar.symbol.isnot(None)
+        )
+        .all()
+    )
     return(results)
 
-def get_entries_from_db(year, month ):
-    print(year, month )
-    session = get_session()
-    date_from, date_to = build_date_range(year, month)
-    print(date_from, date_to)
+def get_entries_from_db(year, month , session = session):
+    date_from, date_to = build_date_range_year_month(year, month)
+
     results = session.query(IPO_Calendar.date,IPO_Calendar.name, IPO_Calendar.symbol).filter(
         IPO_Calendar.date >= date_from,
         IPO_Calendar.date <= date_to
     ).all()
     return(results)
 
-def get_symbol_details(symbol):
-    session = get_session()
+def get_symbol_details(symbol, session = session):
     results = session.query(StockSymbols.description,StockSymbols.currency).filter(
         StockSymbols.symbol == symbol
     ).first()

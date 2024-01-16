@@ -16,10 +16,10 @@ limitations under the License.
 
 # This file
 
-from app.dba.db_helper import build_date_range, IPO_Calendar, get_engine_by_db_params
-from dags.db_query_creator import get_scalar_aggregation_from_table
-from config import HOST, DATABASE, USER, PASSWORD
-from sqlalchemy import create_engine, select, func, Table, MetaData, and_, or_
+from app.dba.db_helper import build_date_range_year_month, IPO_Calendar, get_engine_by_db_params
+from dags.db_query_creator import get_scalar_aggregation_from_table, get_list_of_column_values_from_table
+from dags.config import HOST, DATABASE, USER, PASSWORD
+from sqlalchemy import select, Table, MetaData, and_, or_
 
 # PostgreSQL connection parameters
 db_params = {
@@ -60,6 +60,24 @@ def check_if_records_exist(table_name):
     else:
         return False
 
+def get_exchanges_from_db():
+    table = Table("Exchanges", metadata, autoload=True)
+    print(f"GET_EXCHANGES_FROM_DB TABLE: '{table}'")
+    column_name = "code"
+    print(f"GET_EXCHANGES_FROM_DB COLUMN_NAME: '{column_name}'")
+
+    data_list_query = get_list_of_column_values_from_table(table, column_name)
+
+    with engine.connect() as conn:
+        result = conn.execute(data_list_query)
+        column_data_list = result.fetchall()
+
+        # Extract the values from the list (assuming a single column)
+        column_values = [item[0] for item in column_data_list]
+
+        return column_values
+
+
 def check_if_value_exist_and_drop(table_name, column_name, value):
     table = Table(table_name, metadata, autoload=True)
 
@@ -87,7 +105,7 @@ def check_if_value_exist_and_drop(table_name, column_name, value):
                 return False
 
 def get_entries(year, month):
-    date_from, date_to = build_date_range(year, month)
+    date_from, date_to = build_date_range_year_month(year, month)
     table = Table("IPO_Calendar", metadata, autoload=True)
 
     where_condition = and_(
@@ -102,7 +120,7 @@ def get_entries(year, month):
     return(result)
 
 def get_symbols(year, month):
-    date_from, date_to = build_date_range(year, month)
+    date_from, date_to = build_date_range_year_month(year, month)
     where_condition = and_(
         IPO_Calendar.date >= date_from,
         IPO_Calendar.date <= date_to,

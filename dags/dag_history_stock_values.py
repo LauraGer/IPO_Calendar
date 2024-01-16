@@ -22,9 +22,9 @@ limitations under the License.
 # This is done like that, because the free API only allowes 25 calls per day.
 import psycopg2
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from app.dba.models import MonthlyHistoryByStockSymbol
-from dags.db_helper import engine, db_params, metadata, check_if_value_exist_and_drop, get_symbols, get_min_max_value_from_table
+from dags.get_db_data import engine, db_params, metadata, check_if_value_exist_and_drop, get_symbols, get_min_max_value_from_table
 from dags.get_sources import get_historical_values_by_symbol
 from datetime import date, datetime
 from sqlalchemy import Table
@@ -47,15 +47,16 @@ def load_by_month_ipo_history():
     for year in range(year_min, year_max + 1):
         start_month = min_date.month if year == year_min else 1
         end_month = max_date.month if year == year_max else 12
-        if cnt > 25:
+        if cnt > 1:
             break
         for month in range(start_month, end_month + 1):
             try:
                 symbols = get_symbols(year, month)
                 for symbol in symbols:
-                    if cnt > 25:
-                        print(cnt)
-                        return
+                    print(f"COUNT ITERATION: '{cnt}'")
+                    # if cnt > 25:
+                    #     print(cnt)
+                    #     return
                     if check_if_value_exist_and_drop(history_table_name, "symbol", symbol):
                         continue
 

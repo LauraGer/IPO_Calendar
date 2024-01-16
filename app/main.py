@@ -13,11 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from app.dba.db_helper import get_entries_from_db, get_history_by_symbol, get_symbol_details, get_entries
+from app.dba.db_helper import get_entries_from_db, get_symbol_details, get_entries
 from app.generator_calendar import add_entries_to_calendar
 from app.generator_graph import build_graph
 from datetime import datetime
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -27,20 +28,27 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
+class DataFetcher:
+    def data_result(year,month):
+        return get_entries(year,month)
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     add_entries_to_calendar(2023, 12)
-    return templates.TemplateResponse("index.html", {"request": request})
+    #return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html", {"request": request})
+
 
 @app.get("/calendar", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("calendar.html", {"request": request})
 
 # Route to fetch data from PostgreSQL
-@app.get("/calendar/data")
-async def get_data():
+@app.get("/calendar/data/{year}/{month}")
+async def get_data(year: int, month: int):
     try:
-        result = get_entries(2020,12)
+        result = DataFetcher.data_result(year,month)
+        print(f"RESULT OF MAIN: '{result}")
         data = []
         for row in result:
             date_obj = row.date
@@ -50,9 +58,9 @@ async def get_data():
                 "symbol": row.symbol,
                 }
             data.append(row_dict)
+
     except Exception as e:
-        print(f"Error occurred: {e}")  # Log the error message for debugging
-        raise  # Raise the exception to get a detailed traceback
+        return JSONResponse(content={"error": f"An error occurred: {e}"}, status_code=500)
 
     return data
 
@@ -92,7 +100,10 @@ async def get_dataset(request: Request, symbol: str):
     graph_html = build_graph(symbol)
 
     details = get_symbol_details(symbol)
-    symbol_details = f"Graph of {symbol} - {details[0]}"
+    if details:
+        symbol_details = f"Graph of {symbol} - {details[0]}"
+    else:
+        symbol_details = f"Graph of {symbol} - No details available!"
 
     return templates.TemplateResponse("stock_graph.html", {"request": request,
                                                            "symbol_graph_title" : symbol_details,

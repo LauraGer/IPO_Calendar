@@ -24,11 +24,11 @@ limitations under the License.
 # Just to reduce potential redundancy there is a delete method which removes based on symbol,name and keeps the latest IPO
 import psycopg2
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from app.dba.models import IPO_Calendar
-from dags.db_helper import engine, db_params, metadata
+from dags.get_db_data import engine, db_params, metadata
 from datetime import date, timedelta, datetime
-from get_sources import get_ipo_data, get_quarter_range
+from dags.get_sources import get_ipo_data, get_quarter_range
 from sqlalchemy import Table, exc, func, select
 
 today = date.today()
