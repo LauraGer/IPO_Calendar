@@ -83,6 +83,11 @@ poetry install
 poetry update (if needed and poetry already installed)
 ```
 
+## test app
+```bash
+pytest ./app/test_app -vvv
+```
+
 ## start app
 ```bash
 poetry shell #to start virtual env

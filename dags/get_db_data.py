@@ -18,7 +18,7 @@ limitations under the License.
 
 from app.dba.db_helper import build_date_range_year_month, IPO_Calendar, get_engine_by_db_params
 from dags.db_query_creator import get_scalar_aggregation_from_table, get_list_of_column_values_from_table
-from dags.config import HOST, DATABASE, USER, PASSWORD
+from dags.config import HOST, DATABASE, USER, PASSWORD, relevant_exchange
 from sqlalchemy import select, Table, MetaData, and_, or_
 
 # PostgreSQL connection parameters
@@ -120,13 +120,15 @@ def get_entries(year, month):
     return(result)
 
 def get_symbols(year, month):
+    relevant_symbol_list = relevant_exchange
     date_from, date_to = build_date_range_year_month(year, month)
     where_condition = and_(
         IPO_Calendar.date >= date_from,
         IPO_Calendar.date <= date_to,
         or_(IPO_Calendar.symbol != None,
             IPO_Calendar.symbol != "",
-            IPO_Calendar.symbol.isnot(None))  # Checking for symbol not being None
+            IPO_Calendar.symbol.isnot(None),
+            IPO_Calendar.symbol.in_(relevant_symbol_list))  # Checking for symbol not being None
     )
 
     select_statement = select([IPO_Calendar.symbol]).where(where_condition)
@@ -138,3 +140,4 @@ def get_symbols(year, month):
     raw_strings = [item[0] for item in result]
 
     return(raw_strings)
+

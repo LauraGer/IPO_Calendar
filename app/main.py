@@ -41,23 +41,28 @@ async def index(request: Request):
 
 @app.get("/calendar", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("calendar.html", {"request": request})
+    return templates.TemplateResponse(request, "calendar.html", {"request": request})
+
+    # return templates.TemplateResponse("calendar.html", {"request": request})
 
 # Route to fetch data from PostgreSQL
 @app.get("/calendar/data/{year}/{month}")
 async def get_data(year: int, month: int):
     try:
         result = DataFetcher.data_result(year,month)
-        print(f"RESULT OF MAIN: '{result}")
         data = []
         for row in result:
-            date_obj = row.date
-            date_str = date_obj.strftime("%Y-%m-%d")
-            row_dict = {
-                "date": date_str,
-                "symbol": row.symbol,
+            if 'date' in row and 'symbol' in row:
+                date_str = row['date']
+                symbol = row['symbol']
+                row_dict = {
+                    "date": date_str,
+                    "symbol": symbol,
                 }
-            data.append(row_dict)
+                data.append(row_dict)
+            else:
+                print(f"Warning: 'date' or 'symbol' not found in row: {row}")
+
 
     except Exception as e:
         return JSONResponse(content={"error": f"An error occurred: {e}"}, status_code=500)
@@ -70,7 +75,7 @@ async def get_dataset(request: Request):
     title = "IPO's"
     table_name = "requested IPO's"
 
-    return templates.TemplateResponse("tables.html",
+    return templates.TemplateResponse(request, "tables.html",
                                       {"request": request,
                                        "title": title,
                                        "table_name": table_name,
@@ -87,7 +92,7 @@ async def get_dataset(request: Request, year: int, month: int):
     table_name = f"requested IPO's for Year: {year} and Month: {month}"
     columns = ["Date", "Desciption", "Symbol"]
 
-    return templates.TemplateResponse("tables.html", {"request": request,
+    return templates.TemplateResponse(request, "tables.html", {"request": request,
                                                       "title": title,
                                                       "count": count,
                                                       "table_name": table_name,
@@ -105,6 +110,6 @@ async def get_dataset(request: Request, symbol: str):
     else:
         symbol_details = f"Graph of {symbol} - No details available!"
 
-    return templates.TemplateResponse("stock_graph.html", {"request": request,
+    return templates.TemplateResponse(request, "stock_graph.html", {"request": request,
                                                            "symbol_graph_title" : symbol_details,
                                                            "graph_html": graph_html})

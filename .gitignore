@@ -7,4 +7,5 @@ poetry.lock
 # Ignore folders
 __pycache__/
 dags/__pycache__/
+dags/local_data/
 .pytest_cache/
