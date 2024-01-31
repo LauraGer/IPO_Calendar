@@ -1,22 +1,24 @@
+
+# Copyright 2023 Laura Gerlach
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
-Copyright 2023 Laura Gerlach
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+WIP - not sure if I want a global db_helper
 """
-# WIP - not sure if I want a global db_helper
 
 from app.config import HOST, DATABASE, USER, PASSWORD
-from app.dba.models import Base, IPO_Calendar, MonthlyHistoryByStockSymbol, StockSymbols
+from dba.models import Base, IPO_Calendar, MonthlyHistoryByStockSymbol, StockSymbols
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -35,14 +37,14 @@ def get_engine_by_db_params(db_params):
     return engine
 
 
-def get_session():
+def get_session(db_params):
    # Create a session
     engine = get_engine_by_db_params(db_params)
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
 
-session = get_session()
+session = get_session(db_params)
 
 # Define connection parameters
 class PostgresIPOcalendarConfig:
@@ -54,6 +56,11 @@ class PostgresIPOcalendarConfig:
     password = PASSWORD
     schema = "public"
 
+def get_year_month_integer(date_str):
+    date_object = datetime.strptime(date_str, "%Y-%m-%d")
+    year_month_numeric = date_object.year * 100 + date_object.month
+
+    return year_month_numeric
 
 def build_date_range_year_month(year, month):
 
@@ -76,11 +83,15 @@ def get_entries_from_db(year, month, session = session):
     return(results)
 
 def get_history_by_symbol(symbol, session = session):
-
-    results = session.query(MonthlyHistoryByStockSymbol.date,
+    print(f"SYMBOL IN get_history_by_symbol: {symbol}")
+    print("SESSION IN get_history_by_symbol")
+    print(session)
+    results = session.query(MonthlyHistoryByStockSymbol.monthly_history_id,
+                            MonthlyHistoryByStockSymbol.date,
                             MonthlyHistoryByStockSymbol.open,
                             MonthlyHistoryByStockSymbol.high,
                             MonthlyHistoryByStockSymbol.low,
+                            MonthlyHistoryByStockSymbol.close,
                             MonthlyHistoryByStockSymbol.volume).filter(
         MonthlyHistoryByStockSymbol.symbol == symbol
     ).all()

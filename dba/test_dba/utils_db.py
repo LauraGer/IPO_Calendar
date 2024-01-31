@@ -1,5 +1,5 @@
 import os
-from app.dba.models import Base
+from dba.models import Base
 from sqlalchemy import Table, delete, MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
 

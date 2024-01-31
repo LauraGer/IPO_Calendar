@@ -1,10 +1,10 @@
 import datetime
 import os
 import pytest
-from app.dba.db_helper import build_date_range_year_month, get_symbols, get_entries_from_db
-from app.dba.models import IPO_Calendar, MonthlyHistoryByStockSymbol
-from app.test_app.utils_db import cleanup_test_table, init_test_database, engine
-from app.test_app.utils_test_data import test_data_IPO_Calendar, test_data_MonthlyHistory
+from dba.db_helper import build_date_range_year_month, get_symbols, get_entries_from_db
+from dba.models import IPO_Calendar, MonthlyHistoryByStockSymbol
+from dba.test_dba.utils_db import cleanup_test_table, init_test_database, engine
+from dba.test_dba.utils_test_data import test_data_IPO_Calendar, test_data_MonthlyHistory
 
 TEST_DB_URL = os.getenv("TEST_DB_URL")
 

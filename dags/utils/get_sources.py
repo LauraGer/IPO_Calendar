@@ -39,6 +39,21 @@ def get_str_date(date):
 
 
 def get_quarter_range(processing_month):
+    """
+    Calculate the start and end dates for a processing period based on the given month.
+
+    Parameters:
+    - processing_month (datetime): The month for which the processing period is calculated.
+
+    Returns:
+    - processing_start (datetime): The start date of the processing period.
+    - processing_end (datetime): The end date of the processing period.
+
+    Example:
+    processing_month = datetime(2023, 5, 15)
+    calculate_processing_period(processing_month)
+    # Returns (datetime(2023, 5, 1), datetime(2023, 8, 1))
+    """
     month_day = 1
     current_quarter = (processing_month.month - 1) // 3 + 1
     next_quarter_start_month = current_quarter * 3 + 1 if current_quarter < 4 else 1
@@ -52,6 +67,25 @@ def get_quarter_range(processing_month):
 
 
 def get_ipo_data(start, end, finnhub_client=finnhub_client):
+    """
+    Retrieve Initial Public Offering (IPO) data within a specified date range.
+
+    Parameters:
+    - start (str): Start date of the desired IPO data range (formatted as 'YYYY-MM-DD').
+    - end (str): End date of the desired IPO data range (formatted as 'YYYY-MM-DD').
+    - finnhub_client (FinnhubClient, optional): An instance of the FinnhubClient class.
+      Defaults to a pre-initialized FinnhubClient.
+
+    Returns:
+    - initial_df (DataFrame): A pandas DataFrame containing IPO data for the specified date range.
+
+    Example:
+    start_date = '2023-01-01'
+    end_date = '2023-12-31'
+    client = FinnhubClient(api_key='your_api_key')
+    get_ipo_data(start_date, end_date, finnhub_client=client)
+    # Returns a DataFrame with IPO data for the specified date range.
+    """
     ipo_data = finnhub_client.ipo_calendar(_from=start, to=end)
     initial_df = pd.json_normalize(ipo_data, "ipoCalendar")
 
@@ -59,25 +93,74 @@ def get_ipo_data(start, end, finnhub_client=finnhub_client):
 
 
 def write_data_in_json_file(file_path, data):
+    """
+    Write data to a JSON file, either creating a new file or appending to an existing one.
+
+    Parameters:
+    - file_path (str): The path to the JSON file.
+    - data (dict or list): The data to be written to the JSON file.
+
+    Example:
+    file_path = 'example.json'
+    data_to_write = {"name": "John Doe", "age": 30, "city": "Example City"}
+    write_data_in_json_file(file_path, data_to_write)
+    # Writes data_to_write to 'example.json' or appends it if the file exists.
+    """
     existing_data = {}
-    # Check if the file exists and read existing data
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             existing_data = json.load(file)
-    # Update existing data with new_data
     existing_data.append(data)
-    # Write the updated data back to the file
     with open(file_path, 'w') as file:
         json.dump(existing_data, file, indent=2)
 
+def check_data_in_json_file(target_data):
+    """
+    Check if specified data is present in a JSON file.
+
+    Parameters:
+    - target_data (str, list, dict, etc.): The data to be checked in the JSON file.
+
+    Returns:
+    - result_tuple (tuple): A tuple containing a boolean indicating if all target data is found,
+      and a list of items not found in the JSON file.
+
+    Example:
+    target_data_single = "John Doe"
+    check_data_in_json_file(target_data_single)
+    # Returns (True, []) if "John Doe" is found in the JSON file, otherwise (False, ["John Doe"]).
+
+    target_data_list = ["John Doe", "Jane Smith", "Bob Johnson"]
+    check_data_in_json_file(target_data_list)
+    # Returns (True, []) if all items are found in the JSON file,
+    # otherwise (False, ["Jane Smith", "Bob Johnson"]).
+    """
+    file_path = unknown_file_path
+
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            existing_data = json.load(file)
+            not_found_items = []
+
+            # If target_data is a list, check each item
+            if isinstance(target_data, list):
+                for item in target_data:
+                    if item not in existing_data:
+                        not_found_items.append(item)
+                return (len(not_found_items) < len(target_data), not_found_items)
+
+            else:
+
+                return (target_data in existing_data, [])
+
+    return (False, [])
 
 def is_json(file_path):
     if not os.path.exists(file_path):
         with open(file_path, 'w') as file:
             file.write("{}")  # Write an empty JSON object
             print(f"Empty JSON file created: {file_path}")
-    else:
-        print(f"JSON file already exists: {file_path}")
+    #File exist
     return True
 
 
@@ -95,7 +178,6 @@ def is_value_in_jsonfile(json_path, target_value):
 
 def get_exchanges_from_csv():
     try:
-
         csv_file_name = "20240118_FinnhubExchanges.csv"
         csv_file_path = os.path.join(local_data_dir, csv_file_name)
 
@@ -109,13 +191,30 @@ def get_exchanges_from_csv():
 
 
 def get_historical_values_by_symbol(symbol):
-    print(symbol)
-    #initialize json file if it does not exist
+    """
+    Get historical monthly values for a given stock symbol using the Alpha Vantage API.
+
+    Parameters:
+    - symbol (str): The stock symbol for which historical data is requested.
+
+    Returns:
+    - result (list or str): If successful, returns a list of dictionaries containing historical monthly data
+      including open, high, low, close, volume, and date. If the symbol is empty, returns "NO SYMBOL."
+      If the API request fails, writes the symbol to a JSON file and returns "NO DATA." If the symbol already exists
+      in the JSON file, returns "NO DATA AVAILABLE." If the API request limit is reached, returns "LIMIT REACHED."
+
+    Example:
+    symbol_to_query = "AAPL"
+    get_historical_values_by_symbol(symbol_to_query)
+    # Returns a list of historical monthly data for Apple Inc. if the API request is successful.
+    """
     is_json(unknown_file_path)
+
     if is_value_in_jsonfile(unknown_file_path, symbol):
         return "NO DATA AVAILABLE"
     if symbol == "":
         return "NO SYMBOL"
+
     url = ALPHA_MONTHLY_URL.replace("##SYMBOL##", symbol)
     request_json = requests.get(url)
     data = request_json.json()
@@ -125,7 +224,7 @@ def get_historical_values_by_symbol(symbol):
 
         return "NO DATA"
 
-    if data["Meta Data"]:
+    if "Meta Data" in data:
         monthly_data = [{"symbol": data["Meta Data"]["2. Symbol"], "date": key, **value, }
                         for key, value in data.get("Monthly Time Series", {}).items()]
         column_mapping = {"1. open": "open",

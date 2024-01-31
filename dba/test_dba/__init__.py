@@ -11,7 +11,7 @@ DATABASE = os.getenv("APP_DB")
 USER = os.getenv("POSTGRES_USER")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")
 
-#os.environ['TEST_DB_URL'] =f"postgresql://{USER}:{PASSWORD}@{HOST}:5432/test_db"
+os.environ['TEST_DB_URL'] =f"postgresql://{USER}:{PASSWORD}@{HOST}:5432/test_db"
 
 
 TEST_DB_URL = os.getenv("TEST_DB_URL")

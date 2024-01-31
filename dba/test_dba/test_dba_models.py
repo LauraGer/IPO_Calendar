@@ -1,8 +1,8 @@
 import pytest
 from datetime import date
-from app.dba.models import MonthlyHistoryByStockSymbol
-from app.test_app.utils_db import init_test_database
-from app.test_app.utils_test_data import test_data_monthly_history
+from dba.models import MonthlyHistoryByStockSymbol
+from dba.test_dba.utils_db import init_test_database
+from dba.test_dba.utils_test_data import test_data_monthly_history
 
 ##############################################################
 # SETUP - PREPARATION

@@ -25,10 +25,10 @@ limitations under the License.
 import psycopg2
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from app.dba.models import IPO_Calendar
-from dags.get_db_data import engine, db_params, metadata
+from dba.models import IPO_Calendar
+from dags.utils.get_db_data import engine, db_params, metadata
 from datetime import date, timedelta, datetime
-from dags.get_sources import get_ipo_data, get_quarter_range
+from dags.utils.get_sources import get_ipo_data, get_quarter_range
 from sqlalchemy import Table, exc, func, select
 
 today = date.today()

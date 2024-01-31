@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from app.dba.db_helper import get_entries_from_db, get_symbol_details, get_entries
+from dba.db_helper import get_entries_from_db, get_entries
 from app.generator_calendar import add_entries_to_calendar
 from app.generator_graph import build_graph
 from datetime import datetime
@@ -104,11 +104,7 @@ async def get_dataset(request: Request, symbol: str):
     #entries = get_history_by_symbol(symbol)
     graph_html = build_graph(symbol)
 
-    details = get_symbol_details(symbol)
-    if details:
-        symbol_details = f"Graph of {symbol} - {details[0]}"
-    else:
-        symbol_details = f"Graph of {symbol} - No details available!"
+    symbol_details = f"Historical data graph for {symbol}"
 
     return templates.TemplateResponse(request, "stock_graph.html", {"request": request,
                                                            "symbol_graph_title" : symbol_details,

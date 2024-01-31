@@ -1,7 +1,7 @@
 import os
 
 #load environment variables
-HOST = os.getenv("DB_HOST")
+HOST = os.getenv("HOST")
 DATABASE = os.getenv("APP_DB")
 USER = os.getenv("POSTGRES_USER")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")

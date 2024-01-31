@@ -3,9 +3,11 @@
 
 # Ignore poetry lock file
 poetry.lock
+.DS_Store
 
 # Ignore folders
 __pycache__/
+app/static/calendar_with_entries.png
 dags/__pycache__/
 dags/local_data/
 .pytest_cache/
