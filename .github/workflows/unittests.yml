@@ -47,6 +47,10 @@ jobs:
       run: |
         poetry run pytest ./dba/test_dba -vvv
 
+    - name: Run dba tests
+      run: |
+        poetry run pytest ./dba/test_dba -vvv
+
     - name: Run app tests
       run: |
         poetry run pytest ./app/test_app -vvv
