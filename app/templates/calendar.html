@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Calendar</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+</head>
+<body>
+    <div class="calendar-container">
+        <img src="{{ url_for('static', path='calendar_empty.png') }}" alt="Calendar" class="calendar-map">
+        <map name="calendar-map">
+            <!-- Define areas (regions) within the image -->
+            <area shape="rect" coords="x1,y1,x2,y2" href="#" alt="Cell 1" title="Cell 1">
+            <!-- Add more <area> elements for other regions -->
+        </map>
+            <!-- Details will be displayed here when an entry is clicked -->
+            <!-- You can use a list, modal, or any HTML structure to display details -->
+        </div>
+    </div>
+
+        <script>
+            function fetchData() {
+                fetch('/calendar/data')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(entry => {
+                            const entryDate = new Date(entry.date);
+                            markDateInCalendar(entryDate);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function markDateInCalendar(date) {
+                const cell = findCellForDate(date);
+                if (cell) {
+                    cell.style.backgroundColor = 'red';
+                }
+            }
+
+            function findCellForDate(date) {
+                // Placeholder logic to find calendar cell based on date
+                // Replace this with your actual logic
+            }
+
+            const calendarImage = document.getElementById('calendar-image');
+            calendarImage.addEventListener('load', () => {
+                const width = calendarImage.width;
+                const height = calendarImage.height;
+                calendarImage.style.width = width + 'px';
+                calendarImage.style.height = height + 'px';
+            });
+
+            fetchData();
+        </script>
+    </body>
+    </html>

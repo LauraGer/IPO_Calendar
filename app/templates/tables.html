@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+</head>
+<body>
+    <h1>{{ table_name }}</h1>
+    <p>{{ count }}</p>
+    <table border="1">
+        <thead>
+            <tr>
+            {% for column in columns %}
+                <th class="bold-heading">{{ column }}</th>
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                {% for value in entry %}
+                <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
