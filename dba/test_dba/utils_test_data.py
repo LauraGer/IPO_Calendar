@@ -1,4 +1,4 @@
-from dba.models import Base, IPO_Calendar, MonthlyHistoryByStockSymbol
+from dba.models_dag import Base, IPO_Calendar, MonthlyHistoryByStockSymbol
 from datetime import datetime, date
 
 

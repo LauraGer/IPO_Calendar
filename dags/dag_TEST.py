@@ -1,10 +1,11 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
-from dba_helper import engine
+from dba.db_helper import get_engine_by_db_params
 from sqlalchemy import MetaData, Table, exc, func, select
 from datetime import datetime
 
+engine = get_engine_by_db_params()
 metadata = MetaData(bind=engine)
 
 def remove_duplicates():

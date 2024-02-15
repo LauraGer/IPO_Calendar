@@ -15,7 +15,7 @@ limitations under the License.
 """
 # DESCRIPTION TO ADD
 
-from dba.models import StockSymbols
+from dba.models_dag import StockSymbols
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime

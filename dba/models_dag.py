@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from sqlalchemy import Column, Integer, String, Date, Float, DateTime, BigInteger, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, Float, DateTime, BigInteger, ForeignKey, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -60,16 +60,18 @@ class MonthlyHistoryByStockSymbol(Base):
     close = Column(Float)
     volume = Column(BigInteger)
 
+    analysis_symbol_monthly = relationship('Analysis_SymbolMonthly', back_populates='monthly_history')
+
 
 class Analysis_SymbolMonthly(Base):
     __tablename__ = "Analysis_SymbolMonthly"
     __table_args__ = {"schema": "public"}
 
     analysis_monthly_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    monthly_history_id = Column(BigInteger)
-    #monthly_history_id = Column(BigInteger, ForeignKey('MonthlyHistoryByStockSymbol.monthly_history_id'))
+    #monthly_history_id = Column(BigInteger)
+    monthly_history_id = Column(BigInteger, ForeignKey('public.MonthlyHistoryByStockSymbol.monthly_history_id'))
     month_key = Column(Integer)
     symbol = Column(String(32))
     monthly_returns = Column(Float)
 
-    #monthly_history = relationship('MonthlyHistoryByStockSymbol', back_populates='analysis_symbol_monthly')
+    monthly_history = relationship('MonthlyHistoryByStockSymbol', back_populates='analysis_symbol_monthly')

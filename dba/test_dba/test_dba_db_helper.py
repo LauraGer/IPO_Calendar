@@ -2,7 +2,7 @@ import datetime
 import os
 import pytest
 from dba.db_helper import build_date_range_year_month, get_symbols, get_entries_from_db
-from dba.models import IPO_Calendar, MonthlyHistoryByStockSymbol
+from dba.models_dag import IPO_Calendar, MonthlyHistoryByStockSymbol
 from dba.test_dba.utils_db import cleanup_test_table, init_test_database, engine
 from dba.test_dba.utils_test_data import test_data_IPO_Calendar, test_data_MonthlyHistory
 

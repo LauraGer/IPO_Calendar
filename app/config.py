@@ -25,9 +25,10 @@ load_dotenv()
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 HOST = os.getenv("HOST")
-DATABASE = os.getenv("APP_DB")
+APP_DB = os.getenv("APP_DB")
 USER = os.getenv("POSTGRES_USER")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")
+IPO_CALENDAR_DB = os.getenv("IPO_CALENDAR_DB")
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -37,3 +38,17 @@ default_font = "Urbanist-Bold.ttf"
 font_path = os.path.join(font_dir,default_font)
 
 static_path = os.path.join(base_dir, "static")
+
+db_params_ipo_calendar = {
+    "host": HOST,
+    "database": IPO_CALENDAR_DB,
+    "user": USER,
+    "password": PASSWORD,
+}
+
+db_params_app = {
+    "host": HOST,
+    "database": APP_DB,
+    "user": USER,
+    "password": PASSWORD,
+}

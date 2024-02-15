@@ -27,15 +27,19 @@ from datetime import datetime
 finnhub_api_key = FINNHUB_API_KEY
 finnhub_client = finnhub.Client(api_key=finnhub_api_key)
 unknown_file_path = 'unknown_symbols.json'
-
+# create unknown_file_path if not existing
+if not os.path.exists(unknown_file_path):
+    with open(unknown_file_path, 'w') as file:
+        json.dump(unknown_file_path, file, indent=2)
 
 def get_str_date(date):
-    print(f"date in get_str_date'{date}'")
-    date_obj = datetime.combine(date)
-    print(f"1. date_obj'{date_obj}'")
-    date_str = date_obj.strftime('%Y-%m-%d')
+    try:
+        date_obj = datetime.combine(date)
+        date_str = date_obj.strftime('%Y-%m-%d')
 
-    return date_str
+        return date_str
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 def get_quarter_range(processing_month):
@@ -54,16 +58,19 @@ def get_quarter_range(processing_month):
     calculate_processing_period(processing_month)
     # Returns (datetime(2023, 5, 1), datetime(2023, 8, 1))
     """
-    month_day = 1
-    current_quarter = (processing_month.month - 1) // 3 + 1
-    next_quarter_start_month = current_quarter * 3 + 1 if current_quarter < 4 else 1
-    current_year = processing_month.year
-    next_year = current_year if next_quarter_start_month != 1 else current_year + 1
-    month = processing_month.month
-    processing_start = datetime(current_year, month, int(month_day))
-    processing_end = datetime(next_year, next_quarter_start_month, int(month_day))
+    try:
+        month_day = 1
+        current_quarter = (processing_month.month - 1) // 3 + 1
+        next_quarter_start_month = current_quarter * 3 + 1 if current_quarter < 4 else 1
+        current_year = processing_month.year
+        next_year = current_year if next_quarter_start_month != 1 else current_year + 1
+        month = processing_month.month
+        processing_start = datetime(current_year, month, int(month_day))
+        processing_end = datetime(next_year, next_quarter_start_month, int(month_day))
 
-    return processing_start, processing_end
+        return processing_start, processing_end
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 def get_ipo_data(start, end, finnhub_client=finnhub_client):
@@ -86,10 +93,13 @@ def get_ipo_data(start, end, finnhub_client=finnhub_client):
     get_ipo_data(start_date, end_date, finnhub_client=client)
     # Returns a DataFrame with IPO data for the specified date range.
     """
-    ipo_data = finnhub_client.ipo_calendar(_from=start, to=end)
-    initial_df = pd.json_normalize(ipo_data, "ipoCalendar")
+    try:
+        ipo_data = finnhub_client.ipo_calendar(_from=start, to=end)
+        initial_df = pd.json_normalize(ipo_data, "ipoCalendar")
 
-    return initial_df
+        return initial_df
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 def write_data_in_json_file(file_path, data):
@@ -106,13 +116,13 @@ def write_data_in_json_file(file_path, data):
     write_data_in_json_file(file_path, data_to_write)
     # Writes data_to_write to 'example.json' or appends it if the file exists.
     """
-    existing_data = {}
-    if os.path.exists(file_path):
+    try:
+        existing_data = {}
         with open(file_path, 'r') as file:
             existing_data = json.load(file)
-    existing_data.append(data)
-    with open(file_path, 'w') as file:
-        json.dump(existing_data, file, indent=2)
+        existing_data.append(data)
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 def check_data_in_json_file(target_data):
     """
@@ -135,10 +145,8 @@ def check_data_in_json_file(target_data):
     # Returns (True, []) if all items are found in the JSON file,
     # otherwise (False, ["Jane Smith", "Bob Johnson"]).
     """
-    file_path = unknown_file_path
-
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
+    try:
+        with open(unknown_file_path, 'r') as file:
             existing_data = json.load(file)
             not_found_items = []
 
@@ -152,8 +160,9 @@ def check_data_in_json_file(target_data):
             else:
 
                 return (target_data in existing_data, [])
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
-    return (False, [])
 
 def is_json(file_path):
     if not os.path.exists(file_path):
@@ -171,9 +180,9 @@ def is_value_in_jsonfile(json_path, target_value):
             if target_value in json_data:
                 return True
     except FileNotFoundError:
-        print(f"File not found: {json_path}")
+        print(f"[{__name__}] - File not found: {json_path}")
     except json.JSONDecodeError:
-        print(f"Invalid JSON format in file: {json_path}")
+        print(f"[{__name__}] - Invalid JSON format in file: {json_path}")
     return False
 
 def get_exchanges_from_csv():
@@ -186,8 +195,8 @@ def get_exchanges_from_csv():
         print(df)
         return df
     except:
-        print(f"You need to safe the file as '{csv_file_path}'")
-        print(f"from url: https://docs.google.com/spreadsheets/d/1I3pBxjfXB056-g_JYf_6o3Rns3BV2kMGG1nCatb91ls/edit#gid=0")
+        print(f"[{__name__}] - You need to safe the file as '{csv_file_path}'")
+        print(f"[{__name__}] - from url: https://docs.google.com/spreadsheets/d/1I3pBxjfXB056-g_JYf_6o3Rns3BV2kMGG1nCatb91ls/edit#gid=0")
 
 
 def get_historical_values_by_symbol(symbol):
@@ -208,36 +217,39 @@ def get_historical_values_by_symbol(symbol):
     get_historical_values_by_symbol(symbol_to_query)
     # Returns a list of historical monthly data for Apple Inc. if the API request is successful.
     """
-    is_json(unknown_file_path)
+    try:
+        is_json(unknown_file_path)
 
-    if is_value_in_jsonfile(unknown_file_path, symbol):
-        return "NO DATA AVAILABLE"
-    if symbol == "":
-        return "NO SYMBOL"
+        if is_value_in_jsonfile(unknown_file_path, symbol):
+            return "NO DATA AVAILABLE"
+        if symbol == "":
+            return "NO SYMBOL"
 
-    url = ALPHA_MONTHLY_URL.replace("##SYMBOL##", symbol)
-    request_json = requests.get(url)
-    data = request_json.json()
+        url = ALPHA_MONTHLY_URL.replace("##SYMBOL##", symbol)
+        request_json = requests.get(url)
+        data = request_json.json()
 
-    if "Error Message" in data:
-        write_data_in_json_file(unknown_file_path, symbol)
+        if "Error Message" in data:
+            write_data_in_json_file(unknown_file_path, symbol)
 
-        return "NO DATA"
+            return "NO DATA"
 
-    if "Meta Data" in data:
-        monthly_data = [{"symbol": data["Meta Data"]["2. Symbol"], "date": key, **value, }
-                        for key, value in data.get("Monthly Time Series", {}).items()]
-        column_mapping = {"1. open": "open",
-                        "2. high": "high",
-                        "3. low": "low",
-                        "4. close": "close",
-                        "5. volume": "volume"}
-        monthly_data = [{column_mapping.get(col, col): val for col, val in entry.items()} for entry in monthly_data]
+        if "Meta Data" in data:
+            monthly_data = [{"symbol": data["Meta Data"]["2. Symbol"], "date": key, **value, }
+                            for key, value in data.get("Monthly Time Series", {}).items()]
+            column_mapping = {"1. open": "open",
+                            "2. high": "high",
+                            "3. low": "low",
+                            "4. close": "close",
+                            "5. volume": "volume"}
+            monthly_data = [{column_mapping.get(col, col): val for col, val in entry.items()} for entry in monthly_data]
 
-        return monthly_data
+            return monthly_data
 
-    else:
-        return "LIMIT REACHED"
+        else:
+            return "LIMIT REACHED"
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 
@@ -249,7 +261,7 @@ def get_stock_symbols(exchange, finnhub_client=finnhub_client):
 
         return df
     except Exception as e:
-        print(f"EXCEPTION: '{e}'")
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 def get_stock_details_with_exchange_fmp_api(fmp_key=FMP_KEY):
@@ -261,4 +273,4 @@ def get_stock_details_with_exchange_fmp_api(fmp_key=FMP_KEY):
 
         return exchange_data
     except Exception as e:
-        print(f"EXCEPTION: '{e}'")
+        print(f"[{__name__}] - an error occurred: {e}")

@@ -25,7 +25,7 @@ limitations under the License.
 import psycopg2
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from dba.models import IPO_Calendar
+from dba.models_dag import IPO_Calendar
 from dags.utils.get_db_data import engine, db_params, metadata
 from datetime import date, timedelta, datetime
 from dags.utils.get_sources import get_ipo_data, get_quarter_range
@@ -109,13 +109,6 @@ remove_duplicates_task = PythonOperator(
 )
 # TASK FLOW
 create_table_task >>  write_task >> remove_duplicates_task
-
-remove_duplicates_task = PythonOperator(
-    task_id='remove_duplicates_task',
-    python_callable=remove_duplicates,
-    dag=dag_load_ipo_data
-)
-
 
 # def copy_data_into_archive():
 #     table_ipo_calendar = Table("IPO_Calendar", metadata, autoload=True)

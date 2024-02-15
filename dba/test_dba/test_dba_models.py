@@ -1,6 +1,6 @@
 import pytest
 from datetime import date
-from dba.models import MonthlyHistoryByStockSymbol
+from dba.models_dag import MonthlyHistoryByStockSymbol
 from dba.test_dba.utils_db import init_test_database
 from dba.test_dba.utils_test_data import test_data_monthly_history
 

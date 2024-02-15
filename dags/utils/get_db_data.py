@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-# This file
+This file
 """
 from dba.db_helper import build_date_range_year_month, IPO_Calendar, get_engine_by_db_params, MonthlyHistoryByStockSymbol
 # from dags.utils.create_db_query import get_scalar_aggregation_from_table, get_list_of_column_values_from_table, get_columns_from_table
@@ -45,44 +45,58 @@ session = get_session(db_params)
 def get_min_max_value_from_table(table_name, value):
     # EXAMPLE:
     # get_min_max_value_from_table(table_ipo_calendar.name, table_ipo_calendar.columns.date)
-    table = Table(table_name, metadata, autoload=True)
-    min_value_statement = get_scalar_aggregation_from_table(table, "min", value)
-    max_value_statement = get_scalar_aggregation_from_table(table, "max", value)
-    min_value = get_one_result_with_query(min_value_statement)
-    max_value = get_one_result_with_query(max_value_statement)
+    try:
+        table = Table(table_name, metadata, autoload=True)
+        min_value_statement = get_scalar_aggregation_from_table(table, "min", value)
+        max_value_statement = get_scalar_aggregation_from_table(table, "max", value)
+        min_value = get_one_result_with_query(min_value_statement)
+        max_value = get_one_result_with_query(max_value_statement)
 
-    return min_value, max_value
+        return min_value, max_value
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
+
 
 def get_one_result_with_query(query):
-    with engine.connect() as conn:
-        result = conn.execute(query)
-        one_result = result.scalar()
-    return one_result
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(query)
+            one_result = result.scalar()
+        return one_result
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 def check_if_records_exist(table_name):
-    table = Table(table_name, metadata, autoload=True)
-    query = get_scalar_aggregation_from_table(table, "count", "date")
-    row_count = get_one_result_with_query(query)
-    if row_count > 0:
-        return True
-    else:
-        return False
+    try:
+        table = Table(table_name, metadata, autoload=True)
+        query = get_scalar_aggregation_from_table(table, "count", "date")
+        row_count = get_one_result_with_query(query)
+        if row_count > 0:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 def get_exchanges_from_db():
-    table = Table("Exchanges", metadata, autoload=True)
-    column_name = "code"
+    try:
+        table = Table("Exchanges", metadata, autoload=True)
+        column_name = "code"
 
-    data_list_query = get_query_list_of_column_values_from_table(table, column_name)
+        data_list_query = get_query_list_of_column_values_from_table(table, column_name)
 
-    with engine.connect() as conn:
-        result = conn.execute(data_list_query)
-        column_data_list = result.fetchall()
+        with engine.connect() as conn:
+            result = conn.execute(data_list_query)
+            column_data_list = result.fetchall()
 
-        # Extract the values from the list (assuming a single column)
-        column_values = [item[0] for item in column_data_list]
+            # Extract the values from the list (assuming a single column)
+            column_values = [item[0] for item in column_data_list]
 
-        return column_values
+            return column_values
+
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 
 def check_if_value_exist(table_name, column_name, value):
@@ -105,79 +119,33 @@ def check_if_value_exist(table_name, column_name, value):
     - Actual deletion is commented out and marked for future use, as API limitations prevent frequent deletions.
 
     """
-    table = Table(table_name, metadata, autoload=True)
+    try:
+        table = Table(table_name, metadata, autoload=True)
 
-    if column_name not in table.columns:
-        print(f"Column '{column_name}' does not exist in the table '{table_name}'.")
+        if column_name not in table.columns:
+            print(f"Column '{column_name}' does not exist in the table '{table_name}'.")
 
-        return False
-    else:
-        with engine.connect() as conn:
-            query = select([table]).where(table.columns[column_name] == value)
-            result = conn.execute(query)
+            return False
+        else:
+            with engine.connect() as conn:
+                query = select([table]).where(table.columns[column_name] == value)
+                result = conn.execute(query)
 
-            rows_to_delete = result.fetchall()
+                rows_to_delete = result.fetchall()
 
-            if rows_to_delete:
-                # delete_query = delete(table).where(table.columns[column_name] == value)
-                # conn.execute(delete_query)
-                # print("NO DELETION CURRENTLY - AS ONLY 25 REQAUEST PER DAY ALLOWED ON API")
-                print(f"{len(rows_to_delete)} record(s) where '{column_name}' = '{value}' exist.")
+                if rows_to_delete:
+                    # delete_query = delete(table).where(table.columns[column_name] == value)
+                    # conn.execute(delete_query)
+                    # print("NO DELETION CURRENTLY - AS ONLY 25 REQAUEST PER DAY ALLOWED ON API")
+                    print(f"{len(rows_to_delete)} record(s) where '{column_name}' = '{value}' exist.")
 
-                return True
-            else:
-                print(f"The value '{value}' does not exist in column '{column_name}' of table '{table_name}'.")
+                    return True
+                else:
+                    print(f"The value '{value}' does not exist in column '{column_name}' of table '{table_name}'.")
 
-                return False
-
-def get_entries(year, month):
-    """
-    Retrieve entries from the IPO Calendar for a specified date range.
-
-    Parameters:
-    - year: The year of the date range.
-    - month: The month of the date range.
-
-    Returns:
-    - Result set containing entries from the IPO Calendar within the specified date range.
-
-    Notes:
-    - This function queries entries from the IPO Calendar based on the provided year and month.
-    - It constructs a WHERE condition to filter entries within the specified date range.
-    - Entries are filtered based on conditions such as date range and non-null symbol values.
-    - Example usage is provided in the function's docstring.
-
-    Example:
-    - result = get_entries(2023, 5)
-    - for row in result:
-    -     print(row['date'], row['symbol'])
-
-    """
-    date_from, date_to = build_date_range_year_month(year, month)
-    # table = Table("IPO_Calendar", metadata, autoload=True)
-
-    # columns_to_fetch = ["date", "symbol"]
-    where_condition = and_(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to,
-        or_(IPO_Calendar.symbol != None,
-            IPO_Calendar.symbol.isnot(None))  # Checking for symbol not being None
-    )
-
-    results = (session.query(IPO_Calendar.date,IPO_Calendar.symbol).filter(where_condition).all())
-    symbol_list = [result.symbol for result in results if result.symbol != '']
-
-    return(symbol_list)
-    # bind_parameters = {
-    #     'date_1': date_from,
-    #     'date_2': date_to
-    # }
-    # select_statement = get_query_columns_from_table(metadata, IPO_Calendar.__tablename__, columns_to_fetch, where_condition, **bind_parameters)
-
-
-    # with engine.connect() as conn:
-    #     result = conn.execute(select_statement)
-    # return(result)
+                    return False
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 def get_symbols(year, month):
     """
@@ -202,21 +170,25 @@ def get_symbols(year, month):
     - Example usage is provided in the function's docstring.
 
     """
-    relevant_symbol_list = relevant_exchange
-    date_from, date_to = build_date_range_year_month(year, month)
+    try:
+        relevant_symbol_list = relevant_exchange
+        date_from, date_to = build_date_range_year_month(year, month)
 
-    where_condition = and_(
-        IPO_Calendar.date >= date_from,
-        IPO_Calendar.date <= date_to,
-        or_(IPO_Calendar.symbol.isnot(None),
-            IPO_Calendar.symbol.in_(relevant_symbol_list)
+        where_condition = and_(
+            IPO_Calendar.date >= date_from,
+            IPO_Calendar.date <= date_to,
+            or_(IPO_Calendar.symbol.isnot(None),
+                IPO_Calendar.symbol.in_(relevant_symbol_list)
+                )
             )
-        )
 
-    results = (session.query(IPO_Calendar.symbol).filter(where_condition).all())
-    symbol_list = [result.symbol for result in results if result.symbol != '']
+        results = (session.query(IPO_Calendar.symbol).filter(where_condition).all())
+        symbol_list = [result.symbol for result in results if result.symbol != '']
 
-    return(symbol_list)
+        return(symbol_list)
+
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
 
 def get_historic_data_by_symbol(symbol):
     """
@@ -250,11 +222,15 @@ def get_historic_data_by_symbol(symbol):
      ...]
 
     """
-    table_name = MonthlyHistoryByStockSymbol.__tablename__
-    columns_to_fetch = ["monthly_history_id", "date", "symbol", "open", "high", "low", "close", "volume"]
-    where_condition = MonthlyHistoryByStockSymbol.symbol == symbol
-    bind_parameters = {'symbol_1': symbol}
-    result_values = get_query_columns_from_table(metadata, table_name, columns_to_fetch, where_condition, **bind_parameters)
+    try:
+        table_name = MonthlyHistoryByStockSymbol.__tablename__
+        columns_to_fetch = ["monthly_history_id", "date", "symbol", "open", "high", "low", "close", "volume"]
+        where_condition = MonthlyHistoryByStockSymbol.symbol == symbol
+        bind_parameters = {'symbol_1': symbol}
+        result_values = get_query_columns_from_table(metadata, table_name, columns_to_fetch, where_condition, **bind_parameters)
 
-    print(result_values)
-    return(result_values)
+        print(result_values)
+        return(result_values)
+
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")

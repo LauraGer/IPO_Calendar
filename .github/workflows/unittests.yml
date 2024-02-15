@@ -27,6 +27,8 @@ jobs:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: test_db
+      APP_DB: test_db
+      IPO_CALENDAR_DB: test_db
 
     steps:
     - name: Checkout code
@@ -46,7 +48,7 @@ jobs:
       run: |
         poetry run pytest ./dba/test_dba -vvv
 
-    # - name: Run app tests
-    #   run: |
-    #     pip install -U email-validator
-    #     poetry run pytest ./app/test_app -vvv
+    - name: Run app tests
+      run: |
+        poetry run pip install -U email-validator
+        poetry run pytest ./app/test_app -vvv

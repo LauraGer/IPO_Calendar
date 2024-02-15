@@ -21,17 +21,17 @@ services:
     command:
       - "/opt/airflow/airflow_setup.sh"
     environment:
-      - FLASK_APP=${FLASK_APP}
+      - PYTHONPATH=/opt/airflow
       - HOST=${HOST}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - AIRFLOW_DB=${AIRFLOW_DB}
-      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
       - APP_DB=${APP_DB}
+      - AIRFLOW_DB=${AIRFLOW_DB}
+      - IPO_CALENDAR_DB=${IPO_CALENDAR_DB}
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=${AIRFLOW__CORE__SQL_ALCHEMY_CONN}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB}
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - PYTHONPATH=/opt/airflow
       - ALPHA_VANTAGE_KEY=${ALPHA_VANTAGE_KEY}
       - FMP_KEY=${FMP_KEY}
     ports:

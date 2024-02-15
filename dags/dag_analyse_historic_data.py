@@ -18,7 +18,7 @@ limitations under the License.
 
 import pandas as pd
 from app.core.get_analysis import get_monthly_returns
-from dba.models import Analysis_SymbolMonthly
+from dba.models_dag import Analysis_SymbolMonthly
 from dba.db_helper import get_history_by_symbol, get_year_month_integer, get_session
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -31,7 +31,7 @@ def create_table_if_not_exist():
         Analysis_SymbolMonthly.__table__.create(engine, checkfirst=True)
 
 def analyse_monthly_data():
-    symbol = "GNMK"
+    symbol = "FNGN"
 
     session = get_session(db_params)
     print("----SESSION-----------")
@@ -40,7 +40,7 @@ def analyse_monthly_data():
 
     columns = ["monthly_history_id", "date", "open", "high", "low", "close", "volume"]
 
-    stock_data = pd.DataFrame(get_historic_data_by_symbol("GNMK"), columns=columns)
+    stock_data = pd.DataFrame(get_historic_data_by_symbol(symbol), columns=columns)
 
     df = (get_monthly_returns(stock_data))
     print(df)

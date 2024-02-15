@@ -5,12 +5,10 @@ description = "A sample project to analyze IPOs and the follow up data"
 authors = ["Laura Gerlach <l.gerlach@icloud.com>"]
 
 [tool.poetry.dependencies]
-apache-airflow = "^2.8.1"
+apache-airflow= ">=2.8.0,<3.0.0"
 cachetools = "^5.3.1"
 discord = "*"
-email-validator= "*"
 fastapi = "*"
-flask-appbuilder = "*"
 finnhub-python = "2.4.18"
 jinja2 = "^3.1.2"
 pandas = "*"
@@ -27,6 +25,9 @@ pytest-flask = "^1.3.0"
 httpx = "^0.26.0"
 pytest-asyncio = "^0.23.3"
 pytest-mock = "^3.12.0"
+bcrypt = "^4.1.2"
+python-multipart = "^0.0.9"
+asyncpg = "^0.29.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.27.1"
