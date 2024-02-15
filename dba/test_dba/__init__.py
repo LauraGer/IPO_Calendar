@@ -7,11 +7,11 @@ load environment variables
 load_dotenv()
 
 HOST = os.getenv("HOST")
-APP_DB = os.getenv("APP_DB")
+DATABASE = os.getenv("APP_DB")
 USER = os.getenv("POSTGRES_USER")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")
-IPO_CALENDAR_DB = os.getenv("IPO_CALENDAR_DB")
-#os.environ['TEST_DB_URL'] =f"postgresql://{USER}:{PASSWORD}@{HOST}:5432/test_db"
+
+os.environ['TEST_DB_URL'] =f"postgresql://{USER}:{PASSWORD}@{HOST}:5432/test_db"
 
 
 TEST_DB_URL = os.getenv("TEST_DB_URL")

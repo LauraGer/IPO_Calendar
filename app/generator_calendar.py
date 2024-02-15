@@ -14,13 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import calendar
-import numpy as np
 import os
-import pandas as pd
-import plotly.graph_objs as go
-import plotly.offline as pyo
 from app.config import font_path, static_path
-from app.dba.db_helper import get_entries
+from dba.db_helper import get_entries
 from PIL import Image, ImageDraw, ImageFont
 
 # Function to add entries to the calendar image

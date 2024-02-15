@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   test:
@@ -25,6 +26,9 @@ jobs:
       HOST: localhost
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: test_db
+      APP_DB: test_db
+      IPO_CALENDAR_DB: test_db
 
     steps:
     - name: Checkout code
@@ -40,6 +44,11 @@ jobs:
         pip install poetry
         poetry install
 
+    - name: Run dba tests
+      run: |
+        poetry run pytest ./dba/test_dba -vvv
+
     - name: Run app tests
       run: |
+        poetry run pip install -U email-validator
         poetry run pytest ./app/test_app -vvv

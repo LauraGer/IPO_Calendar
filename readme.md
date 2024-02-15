@@ -19,6 +19,7 @@
 - [ ] Analyse historical IPOs and theirs success
   - [ ] Define questions to get answeres:
     - What was the best performing IPO from 2022 in 2023?
+
 ### 3. Interactive calendar
 - [x] Create Calendar page with entries
 - [ ] interaktive - I would like to have the calender with entries and on hover over entries some details
@@ -30,6 +31,8 @@
 - [ ] request upcoming IPOs
 - [ ] get stock details by stock symbols
 
+### EXTENSIONS?
+ - [ ] adding an calendar overview of dividends
 
 # to run this code locally simply follow these steps 🙂
 
@@ -45,19 +48,25 @@ I'm using the below ones to gather bits and pieces together.
 
 ## create in root directory a `.env` file and replace `###`
 ```.env
+AIRFLOW_DB=###
+AIRFLOWWEBSERVERRBAC=False
+ADMIN_USER=###
+ADMIN_PASSWORD=###
+APP_DB=###
 FLASK_APP=airflow.www.app:cached_app()
-DATABASE_URL==###
-AIRFLOW__CORE__SQL_ALCHEMY_CONN==###
-FINNHUB_API_KEY==###
-HOST==###
-AIRFLOW_DB==###
-APP_DB==###
-POSTGRES_USER==###
+HOST=###
+IPO_CALENDAR_DB=###
+PYTHONPATH=IPO_Calendar
+POSTGRES_USER=###
 POSTGRES_PASSWORD=###
-AIRFLOW__WEBSERVER__RBAC=False
-ADMIN_USER==###
-ADMIN_PASSWORD==###
-ALPHA_VANTAGE_KEY==###
+SQLALCHEMY_SILENCE_UBER_WARNING=1
+
+ALPHA_VANTAGE_KEY=###
+DISCORD_TOKEN=###
+FINNHUB_API_KEY=###
+FMP_KEY=###
+
+TEST_DB_URL=postgresql://user:password@localhost:5432/test_db
 ```
 
 ## run docker-compose to initialize postgres and start airflow
@@ -116,3 +125,7 @@ http://localhost:8000/StockGraphSymbolFilter?symbol=xyz
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Fonts](https://fonts.google.com/specimen/Urbanist)
 - [Postgres](https://www.postgresql.org/)
+
+another font (https://unblast.com/download/48373/)
+
+[Diagram](https://excalidraw.com/#json=LdLuiPGpm8GoXHQTZZvNy,irJhRZTeb3N7nAamocPzvQ)

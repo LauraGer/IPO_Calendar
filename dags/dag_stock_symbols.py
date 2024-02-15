@@ -15,12 +15,12 @@ limitations under the License.
 """
 # DESCRIPTION TO ADD
 
-from app.dba.models import StockSymbols
+from dba.models_dag import StockSymbols
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from dags.get_db_data import engine, metadata, get_exchanges_from_db
-from dags.get_sources import get_stock_symbols, get_exchanges_from_csv, get_stock_details_with_exchange_fmp_api
+from dags.utils.get_db_data import engine, metadata, get_exchanges_from_db
+from dags.utils.get_sources import get_stock_symbols, get_exchanges_from_csv, get_stock_details_with_exchange_fmp_api
 from sqlalchemy import  exc
 
 

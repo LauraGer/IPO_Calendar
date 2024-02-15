@@ -23,9 +23,9 @@ limitations under the License.
 import psycopg2
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from app.dba.models import MonthlyHistoryByStockSymbol
-from dags.get_db_data import engine, db_params, metadata, check_if_value_exist_and_drop, get_symbols, get_min_max_value_from_table
-from dags.get_sources import get_historical_values_by_symbol
+from dba.models_dag import MonthlyHistoryByStockSymbol
+from dags.utils.get_db_data import engine, db_params, metadata, check_if_value_exist, get_symbols, get_min_max_value_from_table
+from dags.utils.get_sources import get_historical_values_by_symbol, check_data_in_json_file
 from datetime import date, datetime
 from sqlalchemy import Table
 
@@ -47,37 +47,45 @@ def load_by_month_ipo_history():
     for year in range(year_min, year_max + 1):
         start_month = min_date.month if year == year_min else 1
         end_month = max_date.month if year == year_max else 12
-        if cnt > 1:
-            break
+
         for month in range(start_month, end_month + 1):
+
+            print(f"year='{year}'")
+            print(f"month='{month}'")
             try:
                 symbols = get_symbols(year, month)
-                for symbol in symbols:
-                    print(f"COUNT ITERATION: '{cnt}'")
-                    # if cnt > 25:
-                    #     print(cnt)
-                    #     return
-                    if check_if_value_exist_and_drop(history_table_name, "symbol", symbol):
-                        continue
+                exists_symbol, missing_symbols = check_data_in_json_file(symbols)
+                print(exists_symbol)
+                print(missing_symbols)
+                if not exists_symbol:
+                    for symbol in missing_symbols:
+                        print(f"load_by_month_ipo_history.cnt: '{cnt}")
+                        print(f"load_by_month_ipo_history.symbol: {symbol}")
+                        # check if symbol is in unknown symbol json file - been already checked if historic data exists
+                        if not check_data_in_json_file(symbol):
+                            print(f"'{symbol}' is already flagged as unknown. No historic data available.")
+                            continue
 
-                    historical_data = get_historical_values_by_symbol(symbol)
-                    # file_path = f"output_{symbol}.json"
-                    # # Write the data to the JSON file
-                    # with open(file_path, "w") as json_file:
-                    #     print(f"WRITE JSON to {file_path}")
-                    #     json.dump(historical_data, json_file)
-                    # if historical_data or
-                    # cnt += 1
-                    if historical_data == "LIMIT REACHED":
-                        print("############################################")
-                        print("Limit for today reached - continue tomorrow!")
-                        print("############################################")
-                        return
-                    if historical_data:
-                        cnt += 1
-                        monthly_history_table = Table(history_table_name, metadata, autoload=True)
-                        with engine.connect() as conn:
-                            conn.execute(monthly_history_table.insert(), historical_data)
+                        elif check_if_value_exist(history_table_name, "symbol", symbol):
+                            continue
+
+                        else:
+                            historical_data = get_historical_values_by_symbol(symbol)
+
+                            if historical_data == "LIMIT REACHED":
+                                print("############################################")
+                                print("Limit for today reached - continue tomorrow!")
+                                print("############################################")
+
+                                return
+
+                            if historical_data:
+                                cnt += 1
+                                monthly_history_table = Table(history_table_name, metadata, autoload=True)
+
+                                with engine.connect() as conn:
+                                    conn.execute(monthly_history_table.insert(), historical_data)
+
             except psycopg2.OperationalError as e:
                 print(f"Error connecting to the database: {e}")
                 print(f"db_params: {db_params}")
