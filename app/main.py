@@ -13,57 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import asyncpg
-from app.config import HOST, USER, PASSWORD, APP_DB, db_params_ipo_calendar, db_params_app
-from dba.db_helper import get_entries_from_db, get_entries, get_engine_by_db_params, get_session
-from dba import models_app, crud, schemas_app
+from app.fetcher_data import DataFetcher
+from app.fetcher_source import stock_sources
 from app.generator_calendar import add_entries_to_calendar
 from app.generator_graph import build_graph
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from fastapi import FastAPI, Request, Depends, HTTPException, Form
+from app.generator_as_of_list import load_search_symbols_historical_data, process_list, process_query
+from fastapi import FastAPI, Request, Form, Query
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from typing import List
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
-engine = get_engine_by_db_params(db_params_ipo_calendar)
-try:
-    models_app.Base.metadata.create_all(bind=engine, checkfirst=True, tables=[models_app.WatchlistUser.__table__])
-except IntegrityError as e:
-    print(f"An error occurred: {e}")
-
-# Connect to the APP_DB database
-async def connect_to_db():
-    return await asyncpg.connect(f"postgresql://{USER}:{PASSWORD}@{HOST}/{APP_DB}")
-
-# Disconnect from the APP_DB database
-async def close_db_connection(connection):
-    await connection.close()
-
-def get_db():
-    session = get_session()
-    try:
-        yield session
-    finally:
-        session.close()
-
-class DataFetcher:
-    def data_result(year,month):
-        result = get_entries(year,month)
-        print(result)
-        return get_entries(year,month)
-
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     add_entries_to_calendar(2023, 12)
     return templates.TemplateResponse(request, "index.html", {"request": request})
-
 
 @app.get("/calendar", response_class=HTMLResponse)
 async def index(request: Request):
@@ -92,22 +62,10 @@ async def get_data(year: int, month: int):
 
     return data
 
-@app.get("/IPOs",response_class=HTMLResponse)
-async def get_dataset(request: Request):
-    entries = get_entries_from_db(2023,12)
-    title = "IPO's"
-    table_name = "requested IPO's"
-
-    return templates.TemplateResponse(request, "tables.html",
-                                      {"request": request,
-                                       "title": title,
-                                       "table_name": table_name,
-                                       "entries": entries})
-
 @app.get("/IPOsFilter", response_class=HTMLResponse)
 async def get_dataset(request: Request, year: int, month: int):
 
-    entries = get_entries_from_db(year, month)
+    entries = DataFetcher.data_get_entries_from_db(year, month)
 
     count =  f"total of {len(entries)}"
 
@@ -133,21 +91,86 @@ async def get_dataset(request: Request, symbol: str):
                                                            "symbol_graph_title" : symbol_details,
                                                            "graph_html": graph_html})
 
-@app.get("/watchlist/", response_class=HTMLResponse)
-async def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+@app.get("/asof/", response_class=HTMLResponse)
+async def read_form(request: Request):
+    symbols_dropdown = DataFetcher.data_get_symbols_app()
+    list_dropdown = DataFetcher.data_get_as_of_distinct_listnames()
+    symbols_with_data = DataFetcher.data_get_symbols_min_date_key_app()
+    return templates.TemplateResponse("asof_form.html", {"request": request,
+                                                    "symbols_dropdown": symbols_dropdown,
+                                                    "symbols_with_data": symbols_with_data,
+                                                    "list_dropdown": list_dropdown,
+                                                    "stock_sources": stock_sources})
 
-@app.post("/watchlist/login/", response_class=HTMLResponse)
-async def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    return templates.TemplateResponse("loggedin.html", {"request": request, "username": username})
 
-@app.get("/watchlist/register/", response_class=HTMLResponse)
-async def register_form(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+# def send_progress(progress):
+#     streamer = ProgressStreamer(progress)
+#     return StreamingResponse(streamer.stream_progress(), media_type="text/event-stream")
 
-@app.post("/watchlist/register")
-def create_user(user: schemas_app.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, user.email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db, user)
+@app.post("/asof/")
+async def submit_form(request: Request,
+    listnameSelect: str = Form(None),
+    listnameNew: str = Form(None),
+    symbols: str = Form(...),
+    asOfDate: str = Form(...),
+    volume: int = Form(...),
+    price: float = Form(...)
+):
+    unprocessed = []
+    processed = []
+    table_data = []
+    is_new = False
+    list_name = listnameNew if listnameNew else listnameSelect
+
+    for symbol in symbols:
+        processed.insert(1, symbol)
+    # for asOfDate, volume, price in zip(asOfDate, volume, price ):
+    table_data.append({"as_of_date": asOfDate, "volume": volume, "price": price})
+
+    if listnameNew:
+        is_new = True
+
+    as_of_list = {
+        "listname":list_name,
+        "as_of_date":asOfDate,
+        "symbol":symbols,
+        "volume":volume,
+        "as_of_price":price,
+        "is_new":is_new
+    }
+
+    list_name_return = process_list(as_of_list)
+    return templates.TemplateResponse("asof_progress.html", {"request": request,
+                                                    "processed": symbols,
+                                                    "unprocessed": unprocessed,
+                                                    "list_name_return": list_name_return})
+
+@app.get("/asof/query", response_class=HTMLResponse)
+async def run_query(value: str, searchType: str,):
+    query_result = process_query(value, searchType)
+        # print(value)
+        # print(searchType)
+    print(query_result)
+    return HTMLResponse(content=str(query_result))
+
+@app.get("/asof/value", response_class=HTMLResponse)
+async def run_query(symbol:str, date:str):
+    source_result = None
+    print(symbol,date)
+    return HTMLResponse(content=source_result)
+
+# @app.get("/asof/listcreate", response_class=HTMLResponse)
+# async def run_query(listName: str):
+#     query_result = f"Query result for {listName}"
+#     print(query_result)
+#     return HTMLResponse(content=query_result)
+
+@app.get("/asof/popup", response_class=HTMLResponse)
+async def show_popup(request: Request, stockNew: str = Query(...), stockSource: str = Query(...)):
+    print(stockSource)
+    processed, unprocessed, cnt_bulk, cnt_update = load_search_symbols_historical_data(stockNew, stockSource)
+    return templates.TemplateResponse("asof_form_popup.html", {"request": request,
+                                                    "processed": processed,
+                                                    "unprocessed": unprocessed,
+                                                    "cnt_bulk": cnt_bulk,
+                                                    "cnt_update": cnt_update })

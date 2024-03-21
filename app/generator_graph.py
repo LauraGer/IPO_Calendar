@@ -22,26 +22,38 @@ from datetime import datetime
 def build_graph(symbol):
     try:
         data = get_history_by_symbol(symbol)
-
-        values = [item[2] for item in data]
         dates = [item[1].strftime("%Y-%m-%d") for item in data]
-
+        open = [item[2] for item in data]
+        high = [item[3] for item in data]
+        low = [item[4] for item in data]
+        close = [item[5] for item in data]
         # # Create a Plotly trace with hoverinfo
-        trace = go.Scatter(
+        trace_low = go.Scatter(
             x=dates,
-            y=values,
+            y=open,
             mode="lines+markers",
-            name="Values over Time",
+            name="low over Time",
             hoverinfo="x+y",  # Show both x (date) and y (value) on hover
-            text=[f"Date: {date}<br>Value: {value}" for date, value in zip(dates, values)]  # Tooltip text
+            text=[f"Date: {date}<br>Value: {value}" for date, value in zip(dates, low)],  # Tooltip text
+            marker=dict(size=6, color='#FF5733'),
+            line=dict(width=6)  # Set line width for trace 2
         )
 
+        trace_high = go.Scatter(
+            x=dates,
+            y=high,
+            mode="lines+markers",
+            name="high over Time",
+            hoverinfo="x+y",  # Show both x (date) and y (value) on hover
+            text=[f"Date: {date}<br>Value: {value}" for date, value in zip(dates, high)],  # Tooltip text
+            marker=dict(size=6, color='#46de9b', symbol="circle"),  # Set marker color for trace 2
+            line=dict(width=6)
+        )
         # Create the layout
         layout = go.Layout(
             xaxis=dict(title="Date"),
-            yaxis=dict(title="Values")
+            yaxis=dict(title="Low & High")
         )
-
         details = get_symbol_details(symbol)
         if details:
             title_text = f"Details: {details}"
@@ -49,11 +61,9 @@ def build_graph(symbol):
             title_text = "No details about this stock available."
         # define x axe ticker text for every 6. month
         x_ticker_text = [f"{date.split('-')[1]}<br>{date.split('-')[0]}" for date in dates if date.split('-')[1] in ['01', '06']]
-
         # Create the figure
         layout = go.Layout(
             title=title_text,
-            #xaxis=dict(title="Date", showgrid=True),
             xaxis=dict(
                 #title="January-June<br>Year",
                 showgrid=False,
@@ -62,18 +72,16 @@ def build_graph(symbol):
                 ticktext=x_ticker_text,
             ),
             yaxis=dict(title="CURRENCY???", showgrid=True),
-        #  margin=dict(l=0, r=0, b=50, t=30),
             plot_bgcolor="white",  # Set the plot background color
         )
-
         dotted_lines = []
         for date in dates:
             dotted_lines.append({
                 'type': 'line',
                 'x0': date,
                 'x1': date,
-                'y0': min(values),
-                'y1': max(values),
+                'y0': min(open),
+                'y1': max(open),
                 'line': {
                     'color': 'rgba(0, 0, 0, 0.2)',
                     'dash': 'dot',
@@ -81,12 +89,7 @@ def build_graph(symbol):
             })
         layout['shapes'] = dotted_lines
         # Create the figure
-        fig = go.Figure(data=[trace], layout=layout)
-
-        # Update the figure style
-        # mint: https://www.colorhexa.com/aaf0d1
-        fig.update_traces(marker=dict(size=8, color='#46de9b', symbol="circle"), line=dict(width=8))
-
+        fig = go.Figure(data=[trace_high, trace_low], layout=layout)
         # Update the layout style with the custom font
         fig.update_layout(
             font=dict(family="Arial, sans-serif", size=12, color="black"),
@@ -97,10 +100,7 @@ def build_graph(symbol):
             paper_bgcolor="rgba(0,0,0,0)",  # Set the paper background color to transparent
             hoverlabel=dict(bgcolor="white", font=dict(family="Arial, sans-serif", size=24, color="black")),
         )
-
-
         # Generate HTML content for the Plotly graph
-        #graph_html = pyo.plot(fig, include_plotlyjs=False, output_type="div")
         graph_html = pio.to_html(fig, full_html=False, include_plotlyjs='cdn')
 
         return graph_html

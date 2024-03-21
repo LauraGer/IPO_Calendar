@@ -8,6 +8,7 @@ PASSWORD = os.getenv("POSTGRES_PASSWORD")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 ALPHA_VANTAGE_KEY = os.getenv("ALPHA_VANTAGE_KEY")
 FMP_KEY = os.getenv("ALPHA_VANTAGE_KEY")
+POLYGON_KEY = os.getenv("POLYGON_KEY")
 
 ALPHA_MONTHLY_URL = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=##SYMBOL##&apikey={ALPHA_VANTAGE_KEY}"
 

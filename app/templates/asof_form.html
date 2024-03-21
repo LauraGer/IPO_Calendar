@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', path='styles_asof.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='styles_fonts.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>AsOf create</title>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loading-spinner" class="loading-spinner"></div>
+        <form id="asof-form" method="post">
+            <div class="form-group">
+                <h1>AsOf watchlist</h1>
+            </div>
+
+            <div class="SelectListForm">
+                <h2>1. select or create AsOf watchlist</h2>
+                <select id="listnameSelect" name="listnameSelect" required class="required">
+                    {% if list_dropdown %}
+                        <option value="" selected disabled>Select an existing value...</option>
+                        {% for item in list_dropdown %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    {% endif %}
+                    <option value="createNew">Create New Value</option>
+                </select>
+            </div><br>
+            <!-- hidden container for createNew value -->
+            <div id="newValueContainer" style="display: none;">
+                <input type="text" name="listnameNew" id="listnameNew" placeholder="Enter new list  name..."><br>
+            </div>
+
+            <!-- <div id="existingListContainer" style="display: none;"> -->
+                <!-- HERE THE QUERY DATA SHOULD GO -->
+
+                <div id="queryResult"></div>
+            <!-- </div> -->
+
+
+            <div class="StocksForm">
+
+                <h2>2. add Stock to watchlist</h2>
+
+                <label class="switch">
+                    <input type="checkbox" id="toggleButton">
+                    <span class="slider"></span>
+                  </label>
+                  search and add other stock symbols
+                  <br>
+
+                  <div id="searchStockContainer" style="display: none;">
+                    <h3>search Symbol </h3>
+                    <div class="popup" id="popup">
+                        <form id="search-form" action="/asof/popup" method="post">
+                            <p>select Source</p>
+                            {% for source, checked in stock_sources.items() if checked %}
+                                <input type="radio" id="stockSource" name="stockSource" value="{{ source }}">
+                                <label for="{{ source }}">{{ source }}</label><br>
+                            {% endfor %}
+                            <br>
+                            <input type="text" name="stockNew" id="stockNew" placeholder="Enter stock symbol...">
+                            <button id="open-popup-btn">Search & Add</button>
+                        </form>
+                    </div>
+                </div>
+
+                <br>
+
+                <table id="asOfTable">
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th>AsOf Date</th>
+                            <th>Volume</th>
+                            <th>AsOf Price <br> (default avg price by date)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <!-- Cell 1 with select dropdown -->
+                        <td>
+                            <select id="symbols" name="symbols" required class="required">
+                                <option value="" selected disabled>Select or search ...</option>
+                                {% for symbol in symbols_dropdown %}
+                                <option value="{{ symbol }}">{{ symbol }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <!-- Cell 2 with date input -->
+                        <td>
+                            <input type="date" id="asOfDate" name="asOfDate" class="asofdate-input" required>
+                        </td>
+                        <!-- Cell 3 with number input for volume -->
+                        <td>
+                            <input type="number" name="volume" class="volume-input" placeholder="Enter volume..." required>
+                        </td>
+                        <!-- Cell 4 with number input for price -->
+                        <td>
+                            <input type="number" id="price" name="price" step="0.01" min="0" class="price-input" placeholder="Enter AsOf price..."required>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+                <div id="priceResult"></div>
+                <!-- Button to add rows -->
+                <!-- <button type="button" onclick="addRow()">Add Row</button> -->
+
+            <br>
+            <div class="form-group">
+                <!-- THIS SHOULD SUBMIT AND SHOW POLOT CHART OF ALL LIST AS OFS AND +- BASED ON AS OF DATE TILL TODAYS DATE -->
+                <input type="submit" value="create|show watchlist" id="submit-btn">
+            </div>
+
+        </div>
+        </form>
+
+    </div>
+    <script>
+        var symbols_dropdown = JSON.parse('{{ symbols_dropdown | tojson | safe }}');
+        var symbols_with_data = JSON.parse('{{ symbols_with_data | tojson | safe }}');
+    </script>
+    <script src="{{ url_for('static', path='scripts_asof.js') }}"></script>
+    <script src="{{ url_for('static', path='scripts_asof_query.js') }}"></script>
+</body>
+</html>
