@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', path='styles_asof.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='styles_fonts.css') }}">
+        <title>Progress</title>
+    </head>
+    <body>
+        <div class="container-popup">
+            <h1>Progress Updates {{ list_name_return }}</h1><br>
+            <h2>Processed Symbols:</h2>
+            {% for item in processed %}
+                <p>{{ item }} </p>
+            {% endfor %}
+            <p>inserted: {{ cnt_bulk }} </p>
+            <p>updated: {{ cnt_update }} </p>
+            <br>
+            <h2>Unprocessed:</h2>
+            {% for item in unprocessed %}
+            <p>{{ item }}</p>
+            {% endfor %}
+
+            <button id="closePopupButton">Close</button>
+        </div>
+
+        <script>
+            // Function to close the popup and refresh the parent page
+            function closePopupAndRefreshParent() {
+                // Close the popup
+                window.close();
+
+                // Refresh the parent page
+                window.opener.location.reload();
+            }
+            // Add click event listener to the close button
+            document.getElementById("closePopupButton").addEventListener("click", closePopupAndRefreshParent);
+        </script>
+    </body>
+    </html>

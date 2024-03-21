@@ -100,3 +100,70 @@ h1, h2, h3 {
 .bold-heading {
   font-family: 'UrbanistBold', Arial, sans-serif;
 }
+
+  /* Custom Select Box Styles */
+  .select-box {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.select-box.active .select-box__options {
+    display: block;
+}
+
+.select-box__options {
+    position: absolute;
+    display: none;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    max-height: 300px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.select-box__option {
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.select-box__option:hover {
+    background-color: #f0f0f0;
+}
+
+.select-box__input {
+    margin-right: 5px;
+}
+
+/* Hide default checkbox */
+.select-box__input {
+    position: absolute;
+    opacity: 0;
+}
+
+/* Show custom checkbox */
+.select-box__input + label::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    margin-right: 5px;
+    background-color: #fff;
+}
+
+/* Show tick when checked */
+.select-box__input:checked + label::before {
+    content: '✔';
+    text-align: center;
+    line-height: 12px;
+    color: #000;
+}

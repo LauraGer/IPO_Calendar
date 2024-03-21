@@ -24,8 +24,8 @@ import psycopg2
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from dba.models_dag import MonthlyHistoryByStockSymbol
-from dags.utils.get_db_data import engine, db_params, metadata, check_if_value_exist, get_symbols, get_min_max_value_from_table
-from dags.utils.get_sources import get_historical_values_by_symbol, check_data_in_json_file
+from utils.get_db_data import engine, db_params, metadata, check_if_value_exist, get_symbols, get_min_max_value_from_table
+from utils.get_sources import AlphaVantage, check_data_in_json_file
 from datetime import date, datetime
 from sqlalchemy import Table
 
@@ -70,7 +70,7 @@ def load_by_month_ipo_history():
                             continue
 
                         else:
-                            historical_data = get_historical_values_by_symbol(symbol)
+                            historical_data = AlphaVantage.get_historical_values_by_symbol(symbol)
 
                             if historical_data == "LIMIT REACHED":
                                 print("############################################")

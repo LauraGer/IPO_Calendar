@@ -20,10 +20,10 @@ import pandas as pd
 from app.core.get_analysis import get_monthly_returns
 from dba.models_dag import Analysis_SymbolMonthly
 from dba.db_helper import get_history_by_symbol, get_year_month_integer, get_session
+from utils.get_db_data import engine, db_params,metadata, get_historic_data_by_symbol
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from dags.utils.get_db_data import engine, db_params,metadata, get_historic_data_by_symbol
 
 
 def create_table_if_not_exist():

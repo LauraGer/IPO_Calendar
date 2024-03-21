@@ -16,7 +16,7 @@ limitations under the License.
 import calendar
 import os
 from app.config import font_path, static_path
-from dba.db_helper import get_entries
+from app.fetcher_data import DataFetcher
 from PIL import Image, ImageDraw, ImageFont
 
 # Function to add entries to the calendar image
@@ -49,7 +49,7 @@ def add_entries_to_calendar(year, month):
                 draw.text((x0 + 2, y0 + 2), str(day), fill="black", font=font_24)
                 # Check if date has an entry
 
-                results = get_entries(year,month)
+                results = DataFetcher.data_result_get_date_symbol_by_year_month(year,month)
                 entries = {
                     (date.year, date.month, date.day): event_name
                     for date, event_name in results

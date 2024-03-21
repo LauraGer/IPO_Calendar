@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', path='styles_asof.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='styles_fonts.css') }}">
+        <title>Progress</title>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Progress Updates {{list_name_return }}</h1><br>
+            <h1>Processed:</h1>
+            <h1>{{ processed }}</h1>
+
+            <!-- {% for item in processed %}
+            <h1>{{ item }}</h1>
+            {% endfor %} -->
+            <br>
+            <h1>Unprocessed:</h1>
+            {% for item in unprocessed %}
+            <h1>{{ item }}</h1>
+            {% endfor %}
+        </div>
+    </body>
+    </html>

@@ -18,9 +18,10 @@ WIP - not sure if I want a global db_helper
 """
 
 from app.config import HOST, IPO_CALENDAR_DB, USER, PASSWORD
+from dba.models_app import Base, AsOfList
 from dba.models_dag import Base, IPO_Calendar, MonthlyHistoryByStockSymbol, StockSymbols
 from datetime import datetime, timedelta
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func, not_, or_
 from sqlalchemy.orm import sessionmaker
 
 # PostgreSQL connection parameters
@@ -117,6 +118,45 @@ def get_history_by_symbol(symbol, session = session):
     except Exception as e:
         print(f"[{__name__}] - an error occurred: {e}")
 
+def get_symbols_of_history(session = session):
+    try:
+        results = session.query(MonthlyHistoryByStockSymbol.symbol.distinct()).filter(
+            MonthlyHistoryByStockSymbol.symbol != None,
+            MonthlyHistoryByStockSymbol.symbol != ""
+        ).all()
+
+        raw_strings = [item[0] for item in results]
+
+        return(raw_strings)
+
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
+
+def get_symbols_min_date_key(session = session):
+    try:
+        # Query to get distinct symbols and their minimum date key
+        results = session.query(
+            MonthlyHistoryByStockSymbol.symbol,
+            func.to_char(func.min(MonthlyHistoryByStockSymbol.date), 'YYYY-MM-DD').label('min_date'),
+            func.sum((MonthlyHistoryByStockSymbol.open +
+                         MonthlyHistoryByStockSymbol.high +
+                         MonthlyHistoryByStockSymbol.low +
+                         MonthlyHistoryByStockSymbol.close) / 4).label('avg_price_o_h_l_c')
+        ).filter(
+            not_(or_(MonthlyHistoryByStockSymbol.symbol == None, MonthlyHistoryByStockSymbol.symbol == ""))
+
+        ).group_by(
+            MonthlyHistoryByStockSymbol.symbol
+        ).all()
+
+        # Convert results to a list of dictionaries
+        symbols_min_datekey = [{'symbol': item[0], 'min_datekey': item[1], 'avg_price_o_h_l_c': item[2]} for item in results]
+
+        return symbols_min_datekey
+
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
+
 def get_symbols(year, month, session = session):
     try:
         date_from, date_to = build_date_range_year_month(year, month)
@@ -135,7 +175,7 @@ def get_symbols(year, month, session = session):
     except Exception as e:
         print(f"[{__name__}] - an error occurred: {e}")
 
-def get_entries(year, month, session = session):
+def get_date_symbol_by_year_month(year, month, session = session):
     try:
         date_from, date_to = build_date_range_year_month(year, month)
         results = (
@@ -174,5 +214,21 @@ def get_symbol_details(symbol, session = session):
             StockSymbols.symbol == symbol
         ).first()
         return(results)
+    except Exception as e:
+        print(f"[{__name__}] - an error occurred: {e}")
+
+def get_as_of_distinct_listnames(session = session):
+    try:
+        # Fetch distinct listnames along with their corresponding AsOf dates
+        results = session.query(
+            AsOfList.listname.distinct()
+            # ,
+            # func.to_char(AsOfList.as_of_date, 'YYYY-MM-DD').label('as_of_date')
+        ).all()
+
+        # listnames_with_date = [{"listname": item[0], "as_of_date": item[1]} for item in results]
+
+        return results
+
     except Exception as e:
         print(f"[{__name__}] - an error occurred: {e}")

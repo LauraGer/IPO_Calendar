@@ -21,8 +21,10 @@ import json
 import os
 import pandas as pd
 import requests
-from dags.config import FINNHUB_API_KEY, ALPHA_MONTHLY_URL, FMP_KEY, local_data_dir
+from dags.config import  ALPHA_MONTHLY_URL, FINNHUB_API_KEY, FMP_KEY, POLYGON_KEY, local_data_dir
 from datetime import datetime
+from utils.schema import ColumnMapping
+from utils.data_transformation import update_timestamps
 
 finnhub_api_key = FINNHUB_API_KEY
 finnhub_client = finnhub.Client(api_key=finnhub_api_key)
@@ -198,61 +200,6 @@ def get_exchanges_from_csv():
         print(f"[{__name__}] - You need to safe the file as '{csv_file_path}'")
         print(f"[{__name__}] - from url: https://docs.google.com/spreadsheets/d/1I3pBxjfXB056-g_JYf_6o3Rns3BV2kMGG1nCatb91ls/edit#gid=0")
 
-
-def get_historical_values_by_symbol(symbol):
-    """
-    Get historical monthly values for a given stock symbol using the Alpha Vantage API.
-
-    Parameters:
-    - symbol (str): The stock symbol for which historical data is requested.
-
-    Returns:
-    - result (list or str): If successful, returns a list of dictionaries containing historical monthly data
-      including open, high, low, close, volume, and date. If the symbol is empty, returns "NO SYMBOL."
-      If the API request fails, writes the symbol to a JSON file and returns "NO DATA." If the symbol already exists
-      in the JSON file, returns "NO DATA AVAILABLE." If the API request limit is reached, returns "LIMIT REACHED."
-
-    Example:
-    symbol_to_query = "AAPL"
-    get_historical_values_by_symbol(symbol_to_query)
-    # Returns a list of historical monthly data for Apple Inc. if the API request is successful.
-    """
-    try:
-        is_json(unknown_file_path)
-
-        if is_value_in_jsonfile(unknown_file_path, symbol):
-            return "NO DATA AVAILABLE"
-        if symbol == "":
-            return "NO SYMBOL"
-
-        url = ALPHA_MONTHLY_URL.replace("##SYMBOL##", symbol)
-        request_json = requests.get(url)
-        data = request_json.json()
-
-        if "Error Message" in data:
-            write_data_in_json_file(unknown_file_path, symbol)
-
-            return "NO DATA"
-
-        if "Meta Data" in data:
-            monthly_data = [{"symbol": data["Meta Data"]["2. Symbol"], "date": key, **value, }
-                            for key, value in data.get("Monthly Time Series", {}).items()]
-            column_mapping = {"1. open": "open",
-                            "2. high": "high",
-                            "3. low": "low",
-                            "4. close": "close",
-                            "5. volume": "volume"}
-            monthly_data = [{column_mapping.get(col, col): val for col, val in entry.items()} for entry in monthly_data]
-
-            return monthly_data
-
-        else:
-            return "LIMIT REACHED"
-    except Exception as e:
-        print(f"[{__name__}] - an error occurred: {e}")
-
-
-
 def get_stock_symbols(exchange, finnhub_client=finnhub_client):
     print(f"GET_STOCK_SYMBOLS ECHANGE: '{exchange}'")
     try:
@@ -274,3 +221,123 @@ def get_stock_details_with_exchange_fmp_api(fmp_key=FMP_KEY):
         return exchange_data
     except Exception as e:
         print(f"[{__name__}] - an error occurred: {e}")
+
+class AlphaVantage:
+    def get_historical_values_by_symbol(symbol):
+        """
+        Get historical monthly values for a given stock symbol using the Alpha Vantage API.
+
+        Parameters:
+        - symbol (str): The stock symbol for which historical data is requested.
+
+        Returns:
+        - result (list or str): If successful, returns a list of dictionaries containing historical monthly data
+        including open, high, low, close, volume, and date. If the symbol is empty, returns "NO SYMBOL."
+        If the API request fails, writes the symbol to a JSON file and returns "NO DATA." If the symbol already exists
+        in the JSON file, returns "NO DATA AVAILABLE." If the API request limit is reached, returns "LIMIT REACHED."
+
+        Example:
+        symbol_to_query = "AAPL"
+        get_historical_values_by_symbol(symbol_to_query)
+        # Returns a list of historical monthly data for Apple Inc. if the API request is successful.
+        """
+        try:
+            is_json(unknown_file_path)
+
+            if is_value_in_jsonfile(unknown_file_path, symbol):
+                return "NO DATA AVAILABLE"
+            if symbol == "":
+                return "NO SYMBOL"
+
+            url = ALPHA_MONTHLY_URL.replace("##SYMBOL##", symbol)
+            print(url)
+            request_json = requests.get(url)
+            print(request_json)
+            data = request_json.json()
+            print(data)
+
+            if "Error Message" in data:
+                write_data_in_json_file(unknown_file_path, symbol)
+
+                return "NO DATA"
+
+            if "Meta Data" in data:
+                monthly_data = [{"symbol": data["Meta Data"]["2. Symbol"], "date": key, **value, }
+                                for key, value in data.get("Monthly Time Series", {}).items()]
+                column_mapping = ColumnMapping.alpha_historical_data
+                print(column_mapping)
+                monthly_data = [{column_mapping.get(col, col): val for col, val in entry.items()} for entry in monthly_data]
+                print(monthly_data)
+                return monthly_data
+
+            else:
+                return "LIMIT REACHED"
+        except Exception as e:
+            print(f"[{__name__}] - an error occurred: {e}")
+
+class Finnhub:
+    def get_monthly_historical_data(symbol):
+        """
+        Get monthly aggregated historical stock data from Finnhub API for a specific symbol.
+
+        Parameters:
+            symbol (str): The stock symbol (e.g., AAPL for Apple Inc.).
+            start_date (str): The start date of the historical data (format: 'YYYY-MM-DD').
+            end_date (str): The end date of the historical data (format: 'YYYY-MM-DD').
+
+        Returns:
+            dict: Monthly aggregated historical stock data in JSON format.
+        """
+        base_url = 'https://finnhub.io/api/v1'
+        endpoint = '/stock/candle'
+        end_date = datetime.today().strftime('%Y-%m-%d')
+
+        params = {
+            'symbol': symbol,
+            'resolution': 'M',  # Monthly resolution
+            'from': '2023-01-01',
+            'to': end_date,
+            'token': finnhub_api_key  # Replace 'your_finnhub_api_token' with your actual API token
+        }
+        response = requests.get(base_url + endpoint, params=params)
+        data = response.json()
+        return data
+
+class PoligonIo:
+    def get_monthly_historical_data(symbol):
+        """
+        Get monthly aggregated historical stock data from POLGON API for a specific symbol.
+
+        Parameters:
+            symbol (str): The stock symbol (e.g., AAPL for Apple Inc.).
+            start_date (str): The start date of the historical data (format: 'YYYY-MM-DD').
+            end_date (str): The end date of the historical data (format: 'YYYY-MM-DD').
+
+        Returns:
+            dict: Monthly aggregated historical stock data in JSON format.
+        """
+        base_url = 'https://api.polygon.io/v2'
+        start_date = "2020-01-01"
+        end_date = datetime.today().strftime('%Y-%m-%d')
+        endpoint = f"/aggs/ticker/{symbol}/range/1/month/{start_date}/{end_date}"
+
+        params = {
+            "adjusted": "true",
+            "sort": "asc",
+            "limit": 50000,
+            'apiKey': POLYGON_KEY
+        }
+        response = requests.get(base_url + endpoint, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            update_timestamps(data, "t", "%Y-%m-%d")
+            monthly_data = [{"symbol": data["ticker"], "date": result["t"], **{k: result[k] for k in ["o", "h", "l", "c", "v"]}}
+                for result in data.get("results", [])]
+            column_mapping = ColumnMapping.poligon_historical_data
+            monthly_data = [{column_mapping[key] if key in column_mapping else key: value for key, value in entry.items()} for entry in monthly_data]
+
+            return monthly_data
+
+        else:
+            print("Failed to fetch data:", response.status_code)

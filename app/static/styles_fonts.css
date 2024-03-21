@@ -1,0 +1,43 @@
+/* Define font faces using @font-face */
+@font-face {
+  font-family: 'UrbanistBlack';
+  src: url('fonts/Urbanist-Black.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'UrbanistBold';
+  src: url('fonts/Urbanist-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'UrbanistLight';
+  src: url('fonts/Urbanist-Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'UrbanistThin';
+  src: url('fonts/Urbanist-Thin.ttf') format('truetype');
+}
+/* Apply the custom font to specific elements */
+body {
+  font-family: 'UrbanistLight', Arial, sans-serif;
+  font-size: 16px;
+}
+title {
+  font-family: 'UrbanistBold', Arial, sans-serif;
+}
+h1, h2, h3 {
+  font-family: 'UrbanistLight', Arial, sans-serif;
+}
+.bold-heading {
+  font-family: 'UrbanistLight', Arial, sans-serif;
+}
+
+select, input, button {
+  font-family: 'UrbanistLight', sans-serif;
+  font-size: 16px;
+}
+button {
+  font-family: 'UrbanistLight', Arial, sans-serif;
+  font-size: 16px;
+}
